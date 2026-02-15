@@ -103,6 +103,7 @@ background:#333;
 background-size:cover;
 background-position:center;
 flex-shrink:0;
+cursor:pointer;
 }
 
 .member-info h4{
@@ -161,6 +162,23 @@ font-size:13px;
 margin-top:10px;
 color:#4dff88;
 font-size:13px;
+}
+
+/* MODAL */
+.modal{
+position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:200;
+}
+.modal-content{
+background:var(--card);padding:20px;border-radius:8px;width:350px;
+display:flex;flex-direction:column;
+gap:10px;
+}
+.modal-content input, .modal-content select{
+padding:8px;
+background:#1e1e1e;color:white;border:none;width:100%;
+}
+.modal-content button{
+padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
 }
 </style>
 </head>
@@ -240,6 +258,25 @@ font-size:13px;
 </div>
 </section>
 
+<!-- MODAL -->
+<div class="modal" id="editModal">
+<div class="modal-content">
+<h3>Profiel Bewerken</h3>
+<input id="modalName" placeholder="Naam">
+<input id="modalEmail" placeholder="Email (privé)" disabled>
+<input id="modalBio" placeholder="Bio / contact info">
+<select id="modalRole">
+<option value="visitor">Visitor</option>
+<option value="member">Member</option>
+<option value="leader">Leader</option>
+<option value="founder">Founder</option>
+</select>
+<input type="file" id="modalAvatar">
+<button onclick="saveEdit()">Opslaan</button>
+<button onclick="closeModal()">Annuleren</button>
+</div>
+</div>
+
 </main>
 
 <script>
@@ -297,6 +334,7 @@ current=null;
 localStorage.removeItem("current");
 updatePermissions();
 updateAuthButton();
+loadTeam();
 openPage("home");
 }else{
 openPage("login");
@@ -363,6 +401,7 @@ current=user;
 saveCurrent();
 updatePermissions();
 updateAuthButton();
+loadTeam();
 openPage("home");
 }
 
@@ -417,13 +456,19 @@ renderChat();
 });
 
 /* TEAM */
+let editingId=null;
 function loadTeam(){
 teamGrid.innerHTML="";
 users.slice(0,6).forEach(u=>{
+let canEdit=false;
+if(current){
+if(["leader","founder"].includes(current.role)) canEdit=true;
+if(current.email && current.email===u.email) canEdit=true;
+}
 teamGrid.innerHTML+=`
 <div class="member">
 <div class="member-top">
-<div class="avatar" style="background-image:url('${u.avatar||DEFAULT_AVATAR}')"></div>
+<div class="avatar" style="background-image:url('${u.avatar||DEFAULT_AVATAR}')" onclick="openEdit('${u.id}')"></div>
 <div class="member-info">
 <h4>${u.name}</h4>
 <div class="role">${u.role}</div>
@@ -431,10 +476,55 @@ teamGrid.innerHTML+=`
 </div>
 <div class="bio">${u.bio||""}</div>
 <div class="contact">${u.contact||""}</div>
+${canEdit?`<button class="edit-btn" onclick='openEdit("${u.id}")'>Edit</button>`:""}
 </div>`;
 });
 }
 loadTeam();
+
+/* MODAL FUNCTIES */
+function openEdit(id){
+editingId=id;
+let u=users.find(x=>x.id===id);
+if(!u) return;
+document.getElementById("modalName").value=u.name;
+document.getElementById("modalEmail").value=u.email;
+document.getElementById("modalBio").value=u.bio;
+document.getElementById("modalRole").value=u.role;
+document.getElementById("editModal").style.display="flex";
+}
+
+function closeModal(){
+editingId=null;
+document.getElementById("editModal").style.display="none";
+}
+
+document.getElementById("modalAvatar").addEventListener("change",function(e){
+const file=e.target.files[0];
+if(!file) return;
+const reader=new FileReader();
+reader.onload=function(ev){
+let u=users.find(x=>x.id===editingId);
+u.avatar=ev.target.result;
+saveUsers();
+loadTeam();
+};
+reader.readAsDataURL(file);
+});
+
+function saveEdit(){
+let u=users.find(x=>x.id===editingId);
+if(!u) return;
+u.name=document.getElementById("modalName").value;
+u.bio=document.getElementById("modalBio").value;
+u.role=document.getElementById("modalRole").value;
+// update gekoppeld account
+let linked=users.find(x=>x.email===u.email);
+if(linked) linked.role=u.role;
+saveUsers();
+loadTeam();
+closeModal();
+}
 
 /* PAGE SWITCH */
 function openPage(id){
