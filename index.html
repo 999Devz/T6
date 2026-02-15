@@ -230,47 +230,80 @@ section.active{display:block}
 </main>
 
 <script>
-let users = JSON.parse(localStorage.getItem("users")||"[]");
+let users = JSON.parse(localStorage.getItem("users") || "[]");
 let current = JSON.parse(localStorage.getItem("current"));
 
-function toggleMenu(){
-  let m=document.getElementById("sidemenu");
-  let o=document.getElementById("overlay");
-  let open=m.style.left==="0px";
-  m.style.left=open?"-260px":"0px";
-  o.style.display=open?"none":"block";
+function saveUsers() {
+  localStorage.setItem("users", JSON.stringify(users));
 }
 
-function openPage(id){
-  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  toggleMenu();
-}
+function register() {
+  const username = name.value.trim();
+  const mail = email.value.trim();
+  const password = pass.value;
 
-function register(){
-  let u={
-    name:name.value||"Anoniem",
-    email:email.value,
-    pass:pass.value,
-    role:"visitor",
-    avatar:"",
-    contact:""
-  };
-  users.push(u);
-  localStorage.setItem("users",JSON.stringify(users));
-  alert("Account aangemaakt");
-}
-
-function login(){
-  current=users.find(u=>(u.email===email.value||u.name===name.value)&&u.pass===pass.value);
-  if(!current){alert("Onjuist");return;}
-  localStorage.setItem("current",JSON.stringify(current));
-  document.getElementById("auth").style.display="none";
-  if(current.role!=="visitor"){
-    chatInput.disabled=false;
+  if (!username || !mail || !password) {
+    alert("Vul alle velden in.");
+    return;
   }
+
+  if (users.find(u => u.email === mail)) {
+    alert("Er bestaat al een account met deze email.");
+    return;
+  }
+
+  const user = {
+    id: crypto.randomUUID(),
+    name: username,
+    email: mail,
+    pass: password, // frontend-only, later hashen in backend
+    role: "visitor",
+    avatar: "",
+    contact: ""
+  };
+
+  users.push(user);
+  saveUsers();
+
+  alert("Account succesvol aangemaakt. Je kunt nu inloggen.");
+  name.value = "";
+  email.value = "";
+  pass.value = "";
+}
+
+function login() {
+  const identifier = name.value.trim();
+  const password = pass.value;
+
+  if (!identifier || !password) {
+    alert("Vul logingegevens in.");
+    return;
+  }
+
+  const user = users.find(
+    u =>
+      (u.email === identifier || u.name === identifier) &&
+      u.pass === password
+  );
+
+  if (!user) {
+    alert("Onjuiste gegevens.");
+    return;
+  }
+
+  current = user;
+  localStorage.setItem("current", JSON.stringify(current));
+
+  alert(`Ingelogd als ${current.name}`);
+  document.getElementById("auth").style.display = "none";
+
+  if (current.role !== "visitor") {
+    chatInput.disabled = false;
+  }
+
   loadTeam();
 }
+
 
 let feed=JSON.parse(localStorage.getItem("feed")||"[]");
 function renderChat(){
