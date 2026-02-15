@@ -244,6 +244,7 @@ padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
 <h2>Inloggen</h2>
 <input id="loginIdentifier" placeholder="Naam of email">
 <input id="loginPass" type="password" placeholder="Wachtwoord">
+<button id="loginBtn">Inloggen</button>
 <div id="loginMsg" class="error-msg"></div>
 
 <hr style="margin:20px 0;border:1px solid #222">
@@ -252,7 +253,7 @@ padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
 <input id="regName" placeholder="Accountnaam">
 <input id="regEmail" placeholder="Email">
 <input id="regPass" type="password" placeholder="Wachtwoord">
-<button onclick="register()">Account maken</button>
+<button id="registerBtn">Account maken</button>
 <div id="regMsg"></div>
 </div>
 </section>
@@ -312,7 +313,7 @@ const authBtn = document.getElementById("authBtn");
 const regMsg = document.getElementById("regMsg");
 const loginMsg = document.getElementById("loginMsg");
 
-// Voeg deze toe:
+// Inputs
 const regName = document.getElementById("regName");
 const regEmail = document.getElementById("regEmail");
 const regPass = document.getElementById("regPass");
@@ -320,13 +321,13 @@ const regPass = document.getElementById("regPass");
 const loginIdentifier = document.getElementById("loginIdentifier");
 const loginPass = document.getElementById("loginPass");
 
-  authBtn.addEventListener("click", handleAuth);
+const loginBtn = document.getElementById("loginBtn");
+const registerBtn = document.getElementById("registerBtn");
 
-  const loginBtn = document.querySelector("#login button");
+// Event listeners
 loginBtn.addEventListener("click", login);
-
-
-
+registerBtn.addEventListener("click", register);
+authBtn.addEventListener("click", handleAuth);
 
 // Menu en pagina's
 const menuBtn = document.getElementById("menuBtn");
@@ -337,7 +338,6 @@ menuBtn.addEventListener("click", () => {
   sideMenu.style.left = "0px";
   overlay.style.display = "block";
 });
-
 overlay.addEventListener("click", closeMenu);
 
 function closeMenu() {
@@ -345,7 +345,6 @@ function closeMenu() {
   overlay.style.display = "none";
 }
 
-// Open page
 function openPage(id){
   document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
   const el=document.getElementById(id);
@@ -354,15 +353,12 @@ function openPage(id){
   closeMenu();
 }
 
-// Zorg dat alle <a> tags met data-page clicks correct handelen
 document.querySelectorAll("#sidemenu a[data-page]").forEach(a=>{
   a.addEventListener("click", e=>{
     const page = a.dataset.page;
     if(page) openPage(page);
   });
 });
-
-
 
 // Variables
 let users = [];
@@ -417,9 +413,22 @@ function saveUsers(){
 // Auth helpers
 function updateAuthButton(){ authBtn.innerText=current?"Uitloggen":"Inloggen"; }
 
+// Handle auth button
+function handleAuth(){
+  if(current){
+    current = null;
+    updatePermissions();
+    updateAuthButton();
+    loadTeam();
+    openPage("home");
+  } else {
+    openPage("login");
+  }
+}
+
 // Register
 function register(){
-  regMsg.innerHTML=""; // reset melding
+  regMsg.innerHTML="";
   const name = regName.value.trim();
   const email = regEmail.value.trim();
   const pass = regPass.value.trim();
@@ -446,19 +455,16 @@ function register(){
     contact: ""
   });
 
-  saveUsers(); 
+  saveUsers();
   regMsg.innerHTML = "<div class='success-msg'>Account succesvol aangemaakt!</div>";
-
-  // Optioneel: velden leegmaken
   regName.value = "";
   regEmail.value = "";
   regPass.value = "";
 }
 
-
 // Login
 function login(){
-  loginMsg.innerHTML=""; // reset foutmelding
+  loginMsg.innerHTML="";
   const id = loginIdentifier.value.trim();
   const pass = loginPass.value.trim();
 
@@ -478,13 +484,12 @@ function login(){
     return;
   }
 
-  // login succesvol
-  current = user; 
-  updatePermissions(); 
-  updateAuthButton(); 
-  loadTeam(); 
+  current = user;
+  updatePermissions();
+  updateAuthButton();
+  loadTeam();
   openPage("home");
-  loginMsg.innerText = ""; // foutmelding weg na succes
+  loginMsg.innerText = "";
 }
 
 // Permissions
