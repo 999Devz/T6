@@ -292,9 +292,48 @@ if(m.style.left==="0px"){m.style.left="-260px";overlay.style.display="none";}
 else{m.style.left="0px";overlay.style.display="block";}
 }
 
-let users=JSON.parse(localStorage.getItem("users")||"[]");
+let users = []; // tijdelijk array
+const usersRef = firebaseRef(firebaseDB, 'users');
+
+// Ophalen van users bij load
+firebaseGet(usersRef).then(snapshot=>{
+  if(snapshot.exists()){
+    users = Object.values(snapshot.val());
+    ensureSixProfiles(); // zorgt dat 6 standaardprofielen altijd bestaan
+    loadTeam();
+  } else {
+    ensureSixProfiles();
+  }
+});
+
+// Functie om users op te slaan
+function saveUsers(){
+  const obj = {};
+  users.forEach(u=>{
+    obj[u.id] = u;
+  });
+  firebaseSet(usersRef, obj);
+}
+
 let current=JSON.parse(localStorage.getItem("current"));
-let feed=JSON.parse(localStorage.getItem("feed")||"[]");
+let feed = [];
+const feedRef = firebaseRef(firebaseDB, 'chatFeed');
+
+firebaseGet(feedRef).then(snapshot=>{
+  if(snapshot.exists()){
+    feed = Object.values(snapshot.val());
+    renderChat();
+  }
+});
+
+// Live luisteren
+firebaseOnValue(feedRef, snapshot=>{
+  if(snapshot.exists()){
+    feed = Object.values(snapshot.val());
+    renderChat();
+  }
+});
+
 const DEFAULT_AVATAR="https://i.imgur.com/6VBx3io.png";
 
 /* Zorg altijd voor 6 standaard profielen */
@@ -372,6 +411,14 @@ contact:""
 });
 
 saveUsers();
+    // Luisteren naar veranderingen in users
+firebaseOnValue(usersRef, snapshot=>{
+  if(snapshot.exists()){
+    users = Object.values(snapshot.val());
+    loadTeam();
+  }
+});
+
 regMsg.innerHTML="<div class='success-msg'>Account succesvol aangemaakt.</div>";
 }
 
@@ -442,19 +489,29 @@ return;
 }
 if(chatInput.value.trim()==="") return;
 
-feed.push({name:current.name,text:chatInput.value});
-localStorage.setItem("feed",JSON.stringify(feed));
-chatInput.value="";
-renderChat();
+chatInput.addEventListener("keypress", e => {
+  if(e.key === "Enter") {
+    if(chatInput.disabled){
+      chatPermissionMsg.innerText = "Je hebt geen permissie om berichten te sturen.";
+      return;
+    }
+    if(chatInput.value.trim() === "") return;
+
+    // Maak nieuw bericht
+    const msg = { name: current.name, text: chatInput.value, timestamp: Date.now() };
+    
+    // Voeg toe aan Firebase
+    const newMsgRef = firebaseRef(firebaseDB, 'chatFeed/' + msg.timestamp);
+    firebaseSet(newMsgRef, msg);
+
+    chatInput.value = "";
+  }
+});
+
 }
 });
 
-window.addEventListener("storage",e=>{
-if(e.key==="feed"){
-feed=JSON.parse(localStorage.getItem("feed"));
-renderChat();
-}
-});
+
 
 /* TEAM */
 let editingId=null;
@@ -542,6 +599,36 @@ toggleMenu();
 }
 openPage("home");
 </script>
+<!-- Firebase SDKs -->
+<script type="module">
+  // Import the functions you need from Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue, child, update } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOi0LZ1aHbb2wJuVkGfGZL1FGzXkY49FA",
+    authDomain: "tahiri-d0f8e.firebaseapp.com",
+    databaseURL: "https://tahiri-d0f8e-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "tahiri-d0f8e",
+    storageBucket: "tahiri-d0f8e.firebasestorage.app",
+    messagingSenderId: "478957646301",
+    appId: "1:478957646301:web:4ad65ecbc4f2fbaacc4634",
+    measurementId: "G-044F3JSETX"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Export db zodat je het in andere scripts kunt gebruiken
+  window.firebaseDB = db;
+  window.firebaseRef = ref;
+  window.firebaseSet = set;
+  window.firebaseGet = get;
+  window.firebaseOnValue = onValue;
+  window.firebaseChild = child;
+  window.firebaseUpdate = update;
+</script>
+
+    
 </body>
 </html>
