@@ -6,11 +6,30 @@
 <body>
   <h1>Welkom</h1>
   <p>Tahiri Mafia.</p>
-  <nav>
-  <a href="index.html">Home</a> |
-  <a href="projecten.html">Projecten</a> |
-  <a href="contact.html">Contact</a> |
-  <a href="donaties.html">Donaties</a>
-</nav>
+ <!-- Hamburger menu -->
+<div class="menu">
+  <div class="hamburger" onclick="toggleMenu()">☰</div>
+  <div class="menu-items" id="menuItems">
+    <a href="index.html">Home</a>
+    <a href="projecten.html">Projecten</a>
+    <a href="contact.html">Contact</a>
+    <a href="donaties.html">Donaties</a>
+  </div>
+</div>
+
+<style>
+.menu { position: relative; }
+.hamburger { font-size: 30px; cursor: pointer; user-select: none; }
+.menu-items { display: none; position: absolute; top: 35px; left: 0; background: #eee; padding: 10px; border: 1px solid #ccc; }
+.menu-items a { display: block; margin: 5px 0; text-decoration: none; color: black; }
+</style>
+
+<script>
+function toggleMenu() {
+  const menu = document.getElementById('menuItems');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+</script>
+
 </body>
 </html>
