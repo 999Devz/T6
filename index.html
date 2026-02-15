@@ -199,8 +199,6 @@ padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
   <a data-page="donations">Donaties</a>
   <a id="authBtn">Inloggen</a>
 </div>
-authBtn.addEventListener("click", handleAuth);
-
 
 <main>
 
@@ -313,8 +311,6 @@ const teamGrid = document.getElementById("teamGrid");
 const authBtn = document.getElementById("authBtn");
 const regMsg = document.getElementById("regMsg");
 const loginMsg = document.getElementById("loginMsg");
-  authBtn.addEventListener("click", handleAuth);
-
 
 // Menu en pagina's
 const menuBtn = document.getElementById("menuBtn");
@@ -341,7 +337,8 @@ function openPage(id){
   document.getElementById("homeHeader").classList.toggle("active",id==="home");
   closeMenu();
 }
-  // Zorg dat alle <a> tags met data-page clicks correct handelen
+
+// Zorg dat alle <a> tags met data-page clicks correct handelen
 document.querySelectorAll("#sidemenu a[data-page]").forEach(a=>{
   a.addEventListener("click", e=>{
     const page = a.dataset.page;
@@ -349,9 +346,20 @@ document.querySelectorAll("#sidemenu a[data-page]").forEach(a=>{
   });
 });
 
-
-
-
+// 🔹 Auth button event - één keer
+authBtn.addEventListener("click", () => {
+  if(current){
+    // Uitloggen
+    current = null;
+    updatePermissions();
+    updateAuthButton();
+    loadTeam();
+    openPage("home");
+  } else {
+    // Open loginpagina
+    openPage("login");
+  }
+});
 
 // Variables
 let users = [];
@@ -403,12 +411,8 @@ function saveUsers(){
   set(usersRef,obj);
 }
 
-// Auth
+// Auth helpers
 function updateAuthButton(){ authBtn.innerText=current?"Uitloggen":"Inloggen"; }
-function handleAuth(){
-  if(current){ current=null; updatePermissions(); updateAuthButton(); loadTeam(); openPage("home"); }
-  else { openPage("login"); }
-}
 
 // Register
 function register(){
@@ -431,7 +435,11 @@ function login(){
   const user=users.find(u=>u.email===id||u.name===id);
   if(!user){ loginMsg.innerText="Account niet gevonden."; return; }
   if(user.pass!==pass){ loginMsg.innerText="Wachtwoord klopt niet."; return; }
-  current=user; updatePermissions(); updateAuthButton(); loadTeam(); openPage("home");
+  current=user; 
+  updatePermissions(); 
+  updateAuthButton(); 
+  loadTeam(); 
+  openPage("home");
 }
 
 // Permissions
@@ -515,9 +523,6 @@ function saveEdit(){
   u.role=document.getElementById("modalRole").value;
   saveUsers(); loadTeam(); closeModal();
 }
-
-
-
 
 // Start
 init();
