@@ -2,34 +2,77 @@
 <html>
 <head>
   <title>Tahiri</title>
+  <style>
+  body { margin:0; font-family: Arial, sans-serif; }
+  .sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 60px;
+  }
+  .sidebar a {
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 18px;
+    color: #fff;
+    display: block;
+    transition: 0.2s;
+  }
+  .sidebar a:hover { background-color: #575757; }
+  .sidebar .closebtn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 30px;
+  }
+  .openbtn {
+    font-size: 30px;
+    cursor: pointer;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 3;
+    color: #111;
+  }
+  .content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+  }
+  </style>
 </head>
 <body>
-  <h1>Welkom</h1>
-  <p>Tahiri Mafia.</p>
- <!-- Hamburger menu -->
-<div class="menu">
-  <div class="hamburger" onclick="toggleMenu()">☰</div>
-  <div class="menu-items" id="menuItems">
-    <a href="index.html">Home</a>
-    <a href="projecten.html">Projecten</a>
-    <a href="contact.html">Contact</a>
-    <a href="donaties.html">Donaties</a>
+
+<!-- Sidebar menu -->
+<div id="mySidebar" class="sidebar">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+  <a href="index.html">Home</a>
+  <a href="projecten.html">Projecten</a>
+  <a href="contact.html">Contact</a>
+  <a href="donaties.html">Donaties</a>
+</div>
+
+<div id="main">
+  <span class="openbtn" onclick="openNav()">☰</span>
+  <div class="content">
+    <h1>Welkom</h1>
+    <p>Tahiri Mafia.</p>
   </div>
 </div>
 
-<style>
-.menu { position: relative; }
-.hamburger { font-size: 30px; cursor: pointer; user-select: none; }
-.menu-items { display: none; position: absolute; top: 35px; left: 0; background: #eee; padding: 10px; border: 1px solid #ccc; }
-.menu-items a { display: block; margin: 5px 0; text-decoration: none; color: black; }
-</style>
-
 <script>
-function toggleMenu() {
-  const menu = document.getElementById('menuItems');
-  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-}
+function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
+function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
 </script>
 
 </body>
 </html>
+
