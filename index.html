@@ -30,6 +30,17 @@ main{padding-top:80px;max-width:1100px;margin:auto;padding:0 16px;}
 .rank{display:inline-block;background:var(--accent);padding:2px 6px;font-size:12px;margin-top:6px;}
 section{display:none}
 section.active{display:block}
+
+/* HOME CENTRAAL EN SCROLLBAAR */
+#home{
+  text-align:center;
+  min-height:calc(100vh - 60px);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
 </style>
 </head>
 
@@ -99,6 +110,21 @@ let users=JSON.parse(localStorage.getItem("users")||"[]");
 let current=JSON.parse(localStorage.getItem("current"));
 let feed=JSON.parse(localStorage.getItem("feed")||"[]");
 
+/* Voeg standaard Dev profiel toe als nog niet aanwezig */
+if(!users.find(u=>u.name==="Dev")){
+  users.unshift({
+    id:crypto.randomUUID(),
+    name:"Dev",
+    email:"dev@tahiri.com",
+    pass:"devpass",
+    role:"founder",
+    avatar:"",
+    contact:""
+  });
+  localStorage.setItem("users",JSON.stringify(users));
+}
+
+/* HAMBURGER MENU */
 function toggleMenu(){
   const m=document.getElementById("sidemenu");
   const o=document.getElementById("overlay");
@@ -116,6 +142,7 @@ function openPage(id){
 
 function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
 
+/* REGISTRATIE */
 function register(){
   const name=regName.value.trim();
   const email=regEmail.value.trim();
@@ -130,6 +157,7 @@ function register(){
   alert("Account gemaakt, je kunt nu inloggen");
 }
 
+/* LOGIN */
 function login(){
   const id=loginIdentifier.value.trim();
   const pass=loginPass.value;
@@ -140,13 +168,17 @@ function login(){
   current=user;
   localStorage.setItem("current",JSON.stringify(current));
 
-  if(current.role!=="visitor")chatInput.disabled=false;
+  /* Founder/Leader/member kan typen */
+  if(current && ["member","leader","founder"].includes(current.role)){
+    chatInput.disabled=false;
+  }
 
   updateLoginBtn();
   loadTeam();
   openPage("home");
 }
 
+/* LOGIN KNOP UPDATEN */
 function updateLoginBtn(){
   const btn=document.getElementById("loginBtn");
   if(!current){btn.textContent="Inloggen";btn.onclick=()=>openPage("login");}
@@ -158,6 +190,7 @@ function logout(){
 }
 updateLoginBtn();
 
+/* CHAT */
 function renderChat(){
   chatFeed.innerHTML="";
   feed.forEach(m=>{
@@ -167,7 +200,7 @@ function renderChat(){
 renderChat();
 
 chatInput.addEventListener("keypress",e=>{
-  if(e.key==="Enter"&&current){
+  if(e.key==="Enter" && current && ["member","leader","founder"].includes(current.role)){
     feed.push({name:current.name,text:chatInput.value});
     localStorage.setItem("feed",JSON.stringify(feed));
     chatInput.value="";
@@ -175,20 +208,39 @@ chatInput.addEventListener("keypress",e=>{
   }
 });
 
+/* TEAM GRID MET EDIT KNOP VOOR LEADER/FOUNDER */
 function loadTeam(){
   teamGrid.innerHTML="";
   users.forEach(u=>{
+    let canEdit = current && ["leader","founder"].includes(current.role);
     teamGrid.innerHTML+=`
     <div class="member">
       <div class="avatar" style="background-image:url('${u.avatar}')"></div>
       <h4>${u.name}</h4>
       <div class="rank">${u.role}</div>
+      ${canEdit ? `<button onclick='editProfile("${u.id}")'>Edit</button>` : ""}
     </div>`;
   });
 }
 loadTeam();
 
-if(current && current.role!=="visitor")chatInput.disabled=false;
+function editProfile(id){
+  let u = users.find(x=>x.id===id);
+  if(!u) return;
+  let newName = prompt("Nieuwe naam:", u.name);
+  let newAvatar = prompt("Nieuwe avatar URL:", u.avatar);
+  let newContact = prompt("Nieuwe contact info:", u.contact);
+  if(newName) u.name=newName;
+  if(newAvatar) u.avatar=newAvatar;
+  if(newContact) u.contact=newContact;
+  localStorage.setItem("users",JSON.stringify(users));
+  loadTeam();
+}
+
+/* Zet chat input actief als current rol niet visitor */
+if(current && ["member","leader","founder"].includes(current.role)){
+  chatInput.disabled=false;
+}
 </script>
 
 </body>
