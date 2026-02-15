@@ -135,42 +135,6 @@ padding:6px;
 cursor:pointer;
 width:100%;
 }
-
-/* AUTH */
-.auth-box{
-max-width:420px;margin:40px auto;
-background:var(--card);padding:20px;border-radius:6px;
-}
-
-.auth-box input,.auth-box button{
-width:100%;padding:10px;margin-top:10px;
-background:#1e1e1e;color:white;border:none;
-}
-
-.auth-box button{background:var(--accent);cursor:pointer}
-
-/* EDIT MODAL */
-#editModal{
-display:none;position:fixed;inset:0;
-background:rgba(0,0,0,.7);z-index:200;
-justify-content:center;align-items:center;
-}
-
-#editBox{
-background:var(--card);
-padding:20px;
-border-radius:8px;
-width:350px;
-}
-
-#editBox input,#editBox textarea,#editBox select{
-width:100%;
-padding:10px;
-margin-top:10px;
-background:#1e1e1e;
-color:white;
-border:none;
-}
 </style>
 </head>
 
@@ -228,7 +192,7 @@ border:none;
 </section>
 
 <section id="login">
-<div class="auth-box">
+<div style="max-width:420px;margin:40px auto;background:#141414;padding:20px;border-radius:6px;">
 <h2>Inloggen</h2>
 <input id="loginIdentifier" placeholder="Naam of email">
 <input id="loginPass" type="password" placeholder="Wachtwoord">
@@ -244,33 +208,16 @@ border:none;
 
 </main>
 
-<div id="editModal">
-<div id="editBox">
-<h3>Profiel bewerken</h3>
-<input id="editName" placeholder="Naam">
-<input id="editMail" placeholder="Privé mail (koppeling account)">
-<textarea id="editContact" placeholder="Bio / contact info"></textarea>
-<select id="editRole">
-<option value="founder">Founder</option>
-<option value="leader">Leader</option>
-<option value="member">Member</option>
-<option value="visitor">Visitor</option>
-</select>
-<input type="file" id="editAvatar" accept="image/*">
-<button onclick="saveProfile()">Opslaan</button>
-<button onclick="closeEdit()">Annuleren</button>
-</div>
-</div>
-
 <script>
 let users = JSON.parse(localStorage.getItem("users")||"[]");
 let current = JSON.parse(localStorage.getItem("current"));
 let feed = JSON.parse(localStorage.getItem("feed")||"[]");
-let editingId=null;
 
-/* INIT STANDAARD PROFIELEN (alleen eerste keer) */
-if(users.length===0){
-for(let i=0;i<6;i++){
+const DEFAULT_AVATAR = "https://i.imgur.com/6VBx3io.png";
+
+/* Zorg dat er ALTIJD 6 standaard profielen zijn */
+function ensureSixProfiles(){
+while(users.length < 6){
 users.push({
 id:crypto.randomUUID(),
 name:"Anoniem",
@@ -284,26 +231,18 @@ contact:""
 }
 localStorage.setItem("users",JSON.stringify(users));
 }
+ensureSixProfiles();
 
-/* MENU */
-menuBtn.onclick=()=>toggleMenu();
-overlay.onclick=()=>toggleMenu();
-
-function toggleMenu(){
-const m=document.getElementById("sidemenu");
-const o=document.getElementById("overlay");
-if(m.style.left==="0px"){m.style.left="-260px";o.style.display="none";}
-else{m.style.left="0px";o.style.display="block";}
-}
-
+/* PAGINA SWITCH */
 function openPage(id){
 document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
-toggleMenu();
 }
 
 /* ACCOUNT */
-function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
+function saveUsers(){
+localStorage.setItem("users",JSON.stringify(users));
+}
 
 function register(){
 const name=regName.value.trim();
@@ -334,25 +273,12 @@ if(!user)return alert("Foute login");
 
 current=user;
 localStorage.setItem("current",JSON.stringify(current));
-updateLoginBtn();
 updateChatAccess();
 loadTeam();
 openPage("home");
 }
 
-function logout(){
-localStorage.removeItem("current");
-location.reload();
-}
-
-function updateLoginBtn(){
-const btn=document.getElementById("loginBtn");
-if(!current){btn.textContent="Inloggen";btn.onclick=()=>openPage("login");}
-else{btn.textContent="Uitloggen";btn.onclick=logout;}
-}
-updateLoginBtn();
-
-/* CHAT REALTIME */
+/* CHAT */
 function updateChatAccess(){
 chatInput.disabled=!(current && ["member","leader","founder"].includes(current.role));
 }
@@ -375,7 +301,6 @@ renderChat();
 }
 });
 
-/* Sync tussen tabs */
 window.addEventListener("storage",e=>{
 if(e.key==="feed"){
 feed=JSON.parse(localStorage.getItem("feed"));
@@ -387,70 +312,21 @@ renderChat();
 function loadTeam(){
 teamGrid.innerHTML="";
 users.forEach(u=>{
-let canEdit=false;
-if(current){
-if(["leader","founder"].includes(current.role))canEdit=true;
-if(current.mail===u.mail)canEdit=true;
-}
-
 teamGrid.innerHTML+=`
 <div class="member">
 <div class="member-top">
-<div class="avatar" style="background-image:url('${u.avatar||""}')"></div>
+<div class="avatar" style="background-image:url('${u.avatar||DEFAULT_AVATAR}')"></div>
 <div class="member-info">
 <h4>${u.name||"Anoniem"}</h4>
-<div class="role">${u.role}</div>
+<div class="role">${u.role||"visitor"}</div>
 <div class="mail">${u.mail? "Mail: "+u.mail:""}</div>
 </div>
 </div>
 <div class="bio">${u.contact||""}</div>
-${canEdit?`<button class="edit-btn" onclick='openEdit("${u.id}")'>Edit</button>`:""}
 </div>`;
 });
 }
 loadTeam();
-
-/* EDIT */
-function openEdit(id){
-editingId=id;
-let u=users.find(x=>x.id===id);
-editName.value=u.name;
-editMail.value=u.mail;
-editContact.value=u.contact;
-editRole.value=u.role;
-editModal.style.display="flex";
-}
-
-function closeEdit(){editModal.style.display="none";}
-
-function saveProfile(){
-let u=users.find(x=>x.id===editingId);
-u.name=editName.value;
-u.mail=editMail.value;
-u.contact=editContact.value;
-u.role=editRole.value;
-
-let linkedAccount=users.find(x=>x.email===u.mail);
-if(linkedAccount){
-linkedAccount.role=u.role;
-}
-
-let file=editAvatar.files[0];
-if(file){
-let reader=new FileReader();
-reader.onload=e=>{
-u.avatar=e.target.result;
-saveUsers();
-loadTeam();
-closeEdit();
-};
-reader.readAsDataURL(file);
-}else{
-saveUsers();
-loadTeam();
-closeEdit();
-}
-}
 </script>
 
 </body>
