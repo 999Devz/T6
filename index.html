@@ -279,11 +279,12 @@ padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
 
 </main>
 
+<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-// --- Firebase Config ---
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCOi0LZ1aHbb2wJuVkGfGZL1FGzXkY49FA",
   authDomain: "tahiri-d0f8e.firebaseapp.com",
@@ -298,11 +299,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// --- Refs ---
-const usersRef = ref(db, 'users');
-const feedRef = ref(db, 'chatFeed');
+// Refs
+const usersRef = ref(db,'users');
+const feedRef = ref(db,'chatFeed');
 
-// --- DOM Elements ---
+// DOM
 const chatInput = document.getElementById("chatInput");
 const chatFeed = document.getElementById("chatFeed");
 const chatPermissionMsg = document.getElementById("chatPermissionMsg");
@@ -311,49 +312,43 @@ const authBtn = document.getElementById("authBtn");
 const regMsg = document.getElementById("regMsg");
 const loginMsg = document.getElementById("loginMsg");
 
-// --- Menu ---
+// Menu
 const menuBtn = document.getElementById("menuBtn");
 const overlay = document.getElementById("overlay");
-menuBtn.onclick = toggleMenu;
-overlay.onclick = toggleMenu;
+menuBtn.addEventListener("click", toggleMenu);
+overlay.addEventListener("click", toggleMenu);
 function toggleMenu(){
-  const m=document.getElementById("sidemenu");
-  if(m.style.left==="0px"){m.style.left="-260px";overlay.style.display="none";}
-  else{m.style.left="0px";overlay.style.display="block";}
+  const m = document.getElementById("sidemenu");
+  if(m.style.left==="0px"){ m.style.left="-260px"; overlay.style.display="none"; }
+  else { m.style.left="0px"; overlay.style.display="block"; }
 }
 
-// --- Variables ---
+// Variables
 let users = [];
 let current = null;
 let feed = [];
-const DEFAULT_AVATAR = "https://i.imgur.com/6VBx3io.png";
+const DEFAULT_AVATAR="https://i.imgur.com/6VBx3io.png";
 
-// --- Initialize users & feed ---
+// Init
 async function init(){
-  // Users
-  const snapshotUsers = await get(usersRef);
-  if(snapshotUsers.exists()){ users = Object.values(snapshotUsers.val()); }
+  const snapUsers = await get(usersRef);
+  if(snapUsers.exists()) users=Object.values(snapUsers.val());
   ensureSixProfiles();
   loadTeam();
 
-  // Feed
-  const snapshotFeed = await get(feedRef);
-  if(snapshotFeed.exists()){ feed = Object.values(snapshotFeed.val()); renderChat(); }
+  const snapFeed = await get(feedRef);
+  if(snapFeed.exists()) feed=Object.values(snapFeed.val());
+  renderChat();
 
-  // Live updates
-  onValue(feedRef, snapshot=>{
-    if(snapshot.exists()){ feed = Object.values(snapshot.val()); renderChat(); }
-  });
-  onValue(usersRef, snapshot=>{
-    if(snapshot.exists()){ users = Object.values(snapshot.val()); loadTeam(); }
-  });
+  onValue(feedRef, snap=>{ if(snap.exists()){ feed=Object.values(snap.val()); renderChat(); }});
+  onValue(usersRef, snap=>{ if(snap.exists()){ users=Object.values(snap.val()); loadTeam(); }});
 
   updatePermissions();
   updateAuthButton();
-  openPage("home"); // start op home
+  openPage("home");
 }
 
-// --- Ensure 6 profiles ---
+// Ensure 6 profiles
 function ensureSixProfiles(){
   while(users.length<6){
     users.push({
@@ -371,29 +366,21 @@ function ensureSixProfiles(){
   saveUsers();
 }
 
-// --- Save users ---
+// Save users
 function saveUsers(){
   const obj={};
   users.forEach(u=>obj[u.id]=u);
   set(usersRef,obj);
 }
 
-// --- Auth Button ---
-function updateAuthButton(){
-  if(current){ authBtn.innerText="Uitloggen"; }
-  else{ authBtn.innerText="Inloggen"; }
-}
+// Auth
+function updateAuthButton(){ authBtn.innerText=current?"Uitloggen":"Inloggen"; }
 function handleAuth(){
-  if(current){
-    current=null;
-    updatePermissions();
-    updateAuthButton();
-    loadTeam();
-    openPage("home");
-  } else { openPage("login"); }
+  if(current){ current=null; updatePermissions(); updateAuthButton(); loadTeam(); openPage("home"); }
+  else { openPage("login"); }
 }
 
-// --- Register ---
+// Register
 function register(){
   regMsg.innerHTML="";
   const name=regName.value.trim();
@@ -401,33 +388,25 @@ function register(){
   const pass=regPass.value.trim();
   if(!name||!email||!pass){ regMsg.innerHTML="<div class='error-msg'>Vul alle velden in.</div>"; return; }
   if(users.find(u=>u.email===email)){ regMsg.innerHTML="<div class='error-msg'>Email bestaat al.</div>"; return; }
-
-  users.push({ id:crypto.randomUUID(), name, email, mail:email, pass, role:"visitor", avatar:"", bio:"", contact:"" });
-  saveUsers();
-  regMsg.innerHTML="<div class='success-msg'>Account aangemaakt.</div>";
+  users.push({id:crypto.randomUUID(), name, email, mail:email, pass, role:"visitor", avatar:"", bio:"", contact:""});
+  saveUsers(); regMsg.innerHTML="<div class='success-msg'>Account aangemaakt.</div>";
 }
 
-// --- Login ---
+// Login
 function login(){
   loginMsg.innerHTML="";
   const id=loginIdentifier.value.trim();
   const pass=loginPass.value.trim();
   if(!id||!pass){ loginMsg.innerText="Vul alle velden in."; return; }
-
-  const user = users.find(u=>u.email===id || u.name===id);
+  const user=users.find(u=>u.email===id||u.name===id);
   if(!user){ loginMsg.innerText="Account niet gevonden."; return; }
   if(user.pass!==pass){ loginMsg.innerText="Wachtwoord klopt niet."; return; }
-
-  current=user;
-  updatePermissions();
-  updateAuthButton();
-  loadTeam();
-  openPage("home");
+  current=user; updatePermissions(); updateAuthButton(); loadTeam(); openPage("home");
 }
 
-// --- Permissions ---
+// Permissions
 function updatePermissions(){
-  if(!current || !["member","leader","founder"].includes(current.role)){
+  if(!current||!["member","leader","founder"].includes(current.role)){
     chatInput.disabled=true;
     chatPermissionMsg.innerText="Je moet ingelogd zijn als member of hoger om berichten te sturen.";
   } else {
@@ -436,35 +415,30 @@ function updatePermissions(){
   }
 }
 
-// --- Chat ---
+// Chat
 function renderChat(){
   chatFeed.innerHTML="";
   feed.sort((a,b)=>a.timestamp-b.timestamp).forEach(m=>{
     chatFeed.innerHTML+=`<div class="msg"><b>${m.name}</b>: ${m.text}</div>`;
   });
 }
-
 chatInput.addEventListener("keypress", e=>{
   if(e.key==="Enter"){
-    if(chatInput.disabled) return;
+    if(chatInput.disabled||!current) return;
     if(chatInput.value.trim()==="") return;
-
-    const msg = { name:current.name, text:chatInput.value, timestamp:Date.now() };
+    const msg={name:current.name, text:chatInput.value, timestamp:Date.now()};
     set(ref(db,'chatFeed/'+msg.timestamp), msg);
     chatInput.value="";
   }
 });
 
-// --- Team ---
+// Team
 let editingId=null;
 function loadTeam(){
   teamGrid.innerHTML="";
   users.slice(0,6).forEach(u=>{
     let canEdit=false;
-    if(current){
-      if(["leader","founder"].includes(current.role)) canEdit=true;
-      if(current.email && current.email===u.email) canEdit=true;
-    }
+    if(current){ if(["leader","founder"].includes(current.role)||current.email===u.email) canEdit=true; }
     teamGrid.innerHTML+=`
       <div class="member">
         <div class="member-top">
@@ -481,10 +455,10 @@ function loadTeam(){
   });
 }
 
-// --- Modal ---
+// Modal
 function openEdit(id){
   editingId=id;
-  const u = users.find(x=>x.id===id);
+  const u=users.find(x=>x.id===id);
   if(!u) return;
   document.getElementById("modalName").value=u.name;
   document.getElementById("modalEmail").value=u.email;
@@ -493,18 +467,17 @@ function openEdit(id){
   document.getElementById("editModal").style.display="flex";
 }
 function closeModal(){ editingId=null; document.getElementById("editModal").style.display="none"; }
-document.getElementById("modalAvatar").addEventListener("change",function(e){
+document.getElementById("modalAvatar").addEventListener("change", e=>{
   const file=e.target.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=function(ev){
     let u=users.find(x=>x.id===editingId);
-    u.avatar=ev.target.result;
-    saveUsers(); loadTeam();
+    u.avatar=ev.target.result; saveUsers(); loadTeam();
   };
   reader.readAsDataURL(file);
 });
 function saveEdit(){
-  let u=users.find(x=>x.id===editingId); if(!u) return;
+  const u=users.find(x=>x.id===editingId); if(!u) return;
   u.name=document.getElementById("modalName").value;
   u.email=document.getElementById("modalEmail").value;
   u.mail=u.email;
@@ -513,15 +486,16 @@ function saveEdit(){
   saveUsers(); loadTeam(); closeModal();
 }
 
-// --- Pages ---
+// Pages
 function openPage(id){
   document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  const el=document.getElementById(id);
+  if(el) el.classList.add("active");
   document.getElementById("homeHeader").classList.toggle("active",id==="home");
   toggleMenu();
 }
 
-// --- Init ---
+// Start
 init();
 </script>
 
