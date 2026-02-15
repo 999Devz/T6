@@ -52,6 +52,7 @@ padding-right:16px;
 section{display:none}
 section.active{display:block}
 
+/* HOME HEADER */
 #homeHeader{
 display:none;
 text-align:center;
@@ -219,7 +220,7 @@ font-size:13px;
 <a onclick="openPage('team')">Team</a>
 <a onclick="openPage('contact')">Contact</a>
 <a onclick="openPage('donations')">Donaties</a>
-<a id="loginBtn" onclick="openPage('login')">Inloggen</a>
+<a onclick="openPage('login')">Inloggen</a>
 </div>
 
 <main>
@@ -298,6 +299,25 @@ let users=JSON.parse(localStorage.getItem("users")||"[]");
 let current=JSON.parse(localStorage.getItem("current"));
 let feed=JSON.parse(localStorage.getItem("feed")||"[]");
 const DEFAULT_AVATAR="https://i.imgur.com/6VBx3io.png";
+
+/* Zorg altijd voor 6 standaard profielen */
+function ensureSixProfiles(){
+while(users.length<6){
+users.push({
+id:crypto.randomUUID(),
+name:"Anoniem",
+mail:"",
+email:"",
+pass:"",
+role:"visitor",
+avatar:"",
+bio:"",
+contact:""
+});
+}
+localStorage.setItem("users",JSON.stringify(users));
+}
+ensureSixProfiles();
 
 function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
 function saveCurrent(){localStorage.setItem("current",JSON.stringify(current));}
@@ -379,7 +399,6 @@ chatInput.disabled=true;
 chatPermissionMsg.innerText="Je hebt geen permissie om berichten te sturen.";
 }
 }
-
 updatePermissions();
 
 /* CHAT */
@@ -389,7 +408,6 @@ feed.forEach(m=>{
 chatFeed.innerHTML+=`<div class="msg"><b>${m.name}</b>: ${m.text}</div>`;
 });
 }
-
 renderChat();
 
 chatInput.addEventListener("keypress",e=>{
@@ -414,6 +432,27 @@ renderChat();
 }
 });
 
+/* TEAM */
+function loadTeam(){
+teamGrid.innerHTML="";
+users.slice(0,6).forEach(u=>{
+teamGrid.innerHTML+=`
+<div class="member">
+<div class="member-top">
+<div class="avatar" style="background-image:url('${u.avatar||DEFAULT_AVATAR}')"></div>
+<div class="member-info">
+<h4>${u.name}</h4>
+<div class="role">${u.role}</div>
+</div>
+</div>
+<div class="bio">${u.bio||""}</div>
+<div class="contact">${u.contact||""}</div>
+</div>`;
+});
+}
+loadTeam();
+
+/* PAGE SWITCH */
 function openPage(id){
 document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
