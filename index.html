@@ -52,7 +52,6 @@ padding-right:16px;
 section{display:none}
 section.active{display:block}
 
-/* HOME HEADER */
 #homeHeader{
 display:none;
 text-align:center;
@@ -104,7 +103,6 @@ background:#333;
 background-size:cover;
 background-position:center;
 flex-shrink:0;
-cursor:pointer;
 }
 
 .member-info h4{
@@ -137,45 +135,6 @@ background:var(--accent);
 border:none;
 color:white;
 padding:6px;
-cursor:pointer;
-width:100%;
-}
-
-/* MODAL */
-.modal{
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.6);
-align-items:center;
-justify-content:center;
-z-index:200;
-}
-
-.modal-content{
-background:#111;
-padding:20px;
-width:400px;
-border-radius:8px;
-}
-
-.modal-content input,
-.modal-content textarea,
-.modal-content select{
-width:100%;
-margin-top:10px;
-padding:8px;
-background:#1e1e1e;
-border:none;
-color:white;
-}
-
-.modal-content button{
-margin-top:12px;
-padding:8px;
-background:var(--accent);
-border:none;
-color:white;
 cursor:pointer;
 width:100%;
 }
@@ -220,7 +179,7 @@ font-size:13px;
 <a onclick="openPage('team')">Team</a>
 <a onclick="openPage('contact')">Contact</a>
 <a onclick="openPage('donations')">Donaties</a>
-<a onclick="openPage('login')">Inloggen</a>
+<a id="authBtn" onclick="handleAuth()">Inloggen</a>
 </div>
 
 <main>
@@ -322,8 +281,29 @@ ensureSixProfiles();
 function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
 function saveCurrent(){localStorage.setItem("current",JSON.stringify(current));}
 
-/* AUTH */
+/* AUTH BUTTON */
+function updateAuthButton(){
+const btn=document.getElementById("authBtn");
+if(current){
+btn.innerText="Uitloggen";
+}else{
+btn.innerText="Inloggen";
+}
+}
 
+function handleAuth(){
+if(current){
+current=null;
+localStorage.removeItem("current");
+updatePermissions();
+updateAuthButton();
+openPage("home");
+}else{
+openPage("login");
+}
+}
+
+/* REGISTER */
 function register(){
 regMsg.innerHTML="";
 const name=regName.value.trim();
@@ -356,6 +336,7 @@ saveUsers();
 regMsg.innerHTML="<div class='success-msg'>Account succesvol aangemaakt.</div>";
 }
 
+/* LOGIN */
 function login(){
 loginMsg.innerHTML="";
 const id=loginIdentifier.value.trim();
@@ -381,9 +362,11 @@ return;
 current=user;
 saveCurrent();
 updatePermissions();
+updateAuthButton();
 openPage("home");
 }
 
+/* PERMISSIONS */
 function updatePermissions(){
 if(!current){
 chatInput.disabled=true;
@@ -400,6 +383,7 @@ chatPermissionMsg.innerText="Je hebt geen permissie om berichten te sturen.";
 }
 }
 updatePermissions();
+updateAuthButton();
 
 /* CHAT */
 function renderChat(){
