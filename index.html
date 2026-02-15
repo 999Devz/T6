@@ -16,10 +16,7 @@ header{position:fixed;top:0;left:0;width:100%;height:60px;display:flex;align-ite
 #sidemenu a{display:block;padding:12px 0;color:var(--text);text-decoration:none;cursor:pointer;}
 #sidemenu a:hover{color:var(--accent)}
 main{padding-top:80px;max-width:1100px;margin:auto;padding:0 16px;}
-#home{text-align:center;margin-top:40px;}
-#home h1{font-size:48px;margin-bottom:10px;}
-#home p{color:var(--muted)}
-.auth-box{max-width:400px;margin:40px auto;background:var(--card);padding:20px;border-radius:6px;}
+.auth-box{max-width:420px;margin:40px auto;background:var(--card);padding:20px;border-radius:6px;}
 .auth-box input,.auth-box button{width:100%;padding:10px;margin-top:10px;background:#1e1e1e;color:white;border:none;}
 .auth-box button{background:var(--accent);cursor:pointer;}
 .chat-box{background:var(--card);padding:10px;border-radius:6px;}
@@ -50,7 +47,7 @@ section.active{display:block}
   <a onclick="openPage('contact')">Contact</a>
   <a onclick="openPage('donations')">Donaties</a>
   <a onclick="openPage('team')">Team</a>
-  <a id="loginBtn" onclick="openPage('auth')">Inloggen</a>
+  <a id="loginBtn" onclick="openPage('login')">Inloggen</a>
 </div>
 
 <main>
@@ -60,14 +57,20 @@ section.active{display:block}
   <p>Tahiri collectief</p>
 </section>
 
-<section id="auth">
+<section id="login">
   <div class="auth-box">
-    <h2>Login / Registratie</h2>
-    <input id="name" placeholder="Accountnaam of email">
-    <input id="email" placeholder="Email (registratie)">
-    <input id="pass" type="password" placeholder="Wachtwoord">
-    <button onclick="register()">Account maken</button>
+    <h2>Inloggen</h2>
+    <input id="loginIdentifier" placeholder="Naam of email">
+    <input id="loginPass" type="password" placeholder="Wachtwoord">
     <button onclick="login()">Inloggen</button>
+
+    <hr style="margin:20px 0;border:1px solid #222">
+
+    <h2>Account maken</h2>
+    <input id="regName" placeholder="Accountnaam">
+    <input id="regEmail" placeholder="Email">
+    <input id="regPass" type="password" placeholder="Wachtwoord">
+    <button onclick="register()">Account maken</button>
   </div>
 </section>
 
@@ -81,17 +84,8 @@ section.active{display:block}
   </div>
 </section>
 
-<section id="contact">
-  <h2>Contact</h2>
-  <p>Email: tahiri.collective@gmail.com</p>
-</section>
-
-<section id="donations">
-  <h2>Donaties</h2>
-  <button style="padding:10px;background:var(--accent);border:none;color:white">
-    Anoniem doneren
-  </button>
-</section>
+<section id="contact"><h2>Contact</h2></section>
+<section id="donations"><h2>Donaties</h2></section>
 
 <section id="team">
   <h2>Team</h2>
@@ -101,21 +95,18 @@ section.active{display:block}
 </main>
 
 <script>
-let users = JSON.parse(localStorage.getItem("users") || "[]");
-let current = JSON.parse(localStorage.getItem("current"));
-let feed = JSON.parse(localStorage.getItem("feed") || "[]");
+let users=JSON.parse(localStorage.getItem("users")||"[]");
+let current=JSON.parse(localStorage.getItem("current"));
+let feed=JSON.parse(localStorage.getItem("feed")||"[]");
 
 function toggleMenu(){
-  const menu=document.getElementById("sidemenu");
-  const overlay=document.getElementById("overlay");
-  if(menu.style.left==="0px"){
-    menu.style.left="-260px";
-    overlay.style.display="none";
-  }else{
-    menu.style.left="0px";
-    overlay.style.display="block";
-  }
+  const m=document.getElementById("sidemenu");
+  const o=document.getElementById("overlay");
+  if(m.style.left==="0px"){m.style.left="-260px";o.style.display="none";}
+  else{m.style.left="0px";o.style.display="block";}
 }
+document.getElementById("menuBtn").onclick=toggleMenu;
+document.getElementById("overlay").onclick=toggleMenu;
 
 function openPage(id){
   document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
@@ -123,39 +114,49 @@ function openPage(id){
   toggleMenu();
 }
 
-document.getElementById("menuBtn").onclick=toggleMenu;
-document.getElementById("overlay").onclick=toggleMenu;
-
 function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
 
 function register(){
-  const username=name.value.trim();
-  const mail=email.value.trim();
-  const password=pass.value;
-  if(!username||!mail||!password)return alert("Vul alles in");
-  if(users.find(u=>u.email===mail))return alert("Email bestaat al");
+  const name=regName.value.trim();
+  const email=regEmail.value.trim();
+  const pass=regPass.value;
 
-  const user={id:crypto.randomUUID(),name:username,email:mail,pass:password,role:"visitor",avatar:""};
-  users.push(user);saveUsers();alert("Account gemaakt");
+  if(!name||!email||!pass)return alert("Vul alles in");
+  if(users.find(u=>u.email===email))return alert("Email bestaat al");
+
+  const user={id:crypto.randomUUID(),name,email,pass,role:"visitor",avatar:""};
+  users.push(user);
+  saveUsers();
+  alert("Account gemaakt, je kunt nu inloggen");
 }
 
 function login(){
-  const identifier=name.value.trim();
-  const password=pass.value;
+  const id=loginIdentifier.value.trim();
+  const pass=loginPass.value;
 
-  const user=users.find(u=>
-    (u.email===identifier||u.name===identifier)&&u.pass===password
-  );
-  if(!user)return alert("Fout");
+  const user=users.find(u=>(u.email===id||u.name===id)&&u.pass===pass);
+  if(!user)return alert("Foute login");
 
   current=user;
   localStorage.setItem("current",JSON.stringify(current));
 
   if(current.role!=="visitor")chatInput.disabled=false;
+
   updateLoginBtn();
   loadTeam();
   openPage("home");
 }
+
+function updateLoginBtn(){
+  const btn=document.getElementById("loginBtn");
+  if(!current){btn.textContent="Inloggen";btn.onclick=()=>openPage("login");}
+  else{btn.textContent="Uitloggen";btn.onclick=logout;}
+}
+function logout(){
+  localStorage.removeItem("current");
+  location.reload();
+}
+updateLoginBtn();
 
 function renderChat(){
   chatFeed.innerHTML="";
@@ -180,30 +181,14 @@ function loadTeam(){
     teamGrid.innerHTML+=`
     <div class="member">
       <div class="avatar" style="background-image:url('${u.avatar}')"></div>
-      <h4>${u.name||"Anoniem"}</h4>
+      <h4>${u.name}</h4>
       <div class="rank">${u.role}</div>
     </div>`;
   });
 }
 loadTeam();
 
-function updateLoginBtn(){
-  const btn=document.getElementById("loginBtn");
-  if(!current){btn.textContent="Inloggen";}
-  else{btn.textContent="Uitloggen";}
-}
-updateLoginBtn();
-
-document.addEventListener("click",e=>{
-  if(e.target.textContent==="Uitloggen"){
-    localStorage.removeItem("current");
-    location.reload();
-  }
-});
-
-if(current && current.role!=="visitor"){
-  chatInput.disabled=false;
-}
+if(current && current.role!=="visitor")chatInput.disabled=false;
 </script>
 
 </body>
