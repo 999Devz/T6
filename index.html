@@ -263,7 +263,7 @@ padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
 <div class="modal-content">
 <h3>Profiel Bewerken</h3>
 <input id="modalName" placeholder="Naam">
-<input id="modalEmail" placeholder="Email (privé)" disabled>
+<input id="modalEmail" placeholder="Email (privé)">
 <input id="modalBio" placeholder="Bio / contact info">
 <select id="modalRole">
 <option value="visitor">Visitor</option>
@@ -276,6 +276,7 @@ padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
 <button onclick="closeModal()">Annuleren</button>
 </div>
 </div>
+
 
 </main>
 
@@ -513,18 +514,24 @@ reader.readAsDataURL(file);
 });
 
 function saveEdit(){
-let u=users.find(x=>x.id===editingId);
-if(!u) return;
-u.name=document.getElementById("modalName").value;
-u.bio=document.getElementById("modalBio").value;
-u.role=document.getElementById("modalRole").value;
-// update gekoppeld account
-let linked=users.find(x=>x.email===u.email);
-if(linked) linked.role=u.role;
-saveUsers();
-loadTeam();
-closeModal();
+    let u=users.find(x=>x.id===editingId);
+    if(!u) return;
+
+    u.name=document.getElementById("modalName").value;
+    u.email=document.getElementById("modalEmail").value; // privé email nu editable
+    u.mail=u.email; // gekoppeld account voor permissions
+    u.bio=document.getElementById("modalBio").value;
+    u.role=document.getElementById("modalRole").value;
+
+    // update gekoppeld account als er al een account met deze email is
+    let linked=users.find(x=>x.email===u.email);
+    if(linked) linked.role=u.role;
+
+    saveUsers();
+    loadTeam();
+    closeModal();
 }
+
 
 /* PAGE SWITCH */
 function openPage(id){
