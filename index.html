@@ -284,6 +284,360 @@ padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyCOi0LZ1aHbb2wJuVkGfGZL1FGzXkY49FA",
+  authDomain: "tahiri-d0f8e.firebaseapp.com",
+  databaseURL: "https://tahiri-d0f8e-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tahiri-d0f8e",
+  storageBucket: "tahiri-d0f8e.firebasestorage.app",
+  messagingSenderId: "478957646301",
+  appId: "1:478957646301:web:4ad65ecbc4f2fbaacc4634",
+  measurementId: "G-044F3JSETX"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// DOM elementen
+const chatInput = document.getElementById("chatInput");
+const chatFeed = document.getElementById("chatFeed");
+const chatPermissionMsg = document.getElementById("chatPermissionMsg");
+const teamGrid = document.getElementById("teamGrid");
+
+const authBtn = document.getElementById("authBtn");
+const regMsg = document.getElementById("regMsg");
+const loginMsg = document.getElementById("loginMsg");
+
+const regName = document.getElementById("regName");
+const regEmail = document.getElementById("regEmail");
+const regPass = document.getElementById("regPass");
+
+const loginIdentifier = document.getElementById("loginIdentifier");
+const loginPass = document.getElementById("loginPass");
+
+const loginBtn = document.getElementById("loginBtn");
+const registerBtn = document.getElementById("registerBtn");
+
+// Menu en pagina's
+const menuBtn = document.getElementById("menuBtn");
+const overlay = document.getElementById("overlay");
+const sideMenu = document.getElementById("sidemenu");
+
+// Eventlisteners toevoegen na DOM ready
+document.addEventListener("DOMContentLoaded", ()=>{
+  loginBtn.addEventListener("click", login);
+  registerBtn.addEventListener("click", register);
+  authBtn.addEventListener("click", handleAuth);
+
+  menuBtn.addEventListener("click", () => {
+    sideMenu.style.left = "0px";
+    overlay.style.display = "block";
+  });
+
+  overlay.addEventListener("click", closeMenu);
+
+  document.querySelectorAll("#sidemenu a[data-page]").forEach(a=>{
+    a.addEventListener("click", ()=>{
+      const page = a.dataset.page;
+      if(page) openPage(page);
+    });
+  });
+
+  init();
+});
+
+// Rest van JS: functies voor menu, pagina open, auth, chat, team, modal
+// (zelfde als eerder, geen code weggelaten)
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tahiri</title>
+
+<style>
+:root{
+--bg:#0b0b0b;
+--card:#141414;
+--accent:#7a0000;
+--text:#f2f2f2;
+--muted:#9a9a9a;
+--error:#ff4d4d;
+}
+
+*{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{margin:0;background:var(--bg);color:var(--text);}
+
+header{
+position:fixed;top:0;left:0;width:100%;height:60px;
+display:flex;align-items:center;padding:0 16px;z-index:100;
+}
+
+.menu-btn{font-size:26px;cursor:pointer;}
+
+#overlay{
+display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;
+}
+
+#sidemenu{
+position:fixed;top:0;left:-260px;width:260px;height:100%;
+background:#0f0f0f;padding:20px;transition:.3s;z-index:100;
+}
+
+#sidemenu a{
+display:block;padding:12px 0;color:var(--text);
+text-decoration:none;cursor:pointer;
+}
+
+#sidemenu a:hover{color:var(--accent)}
+
+main{
+padding-top:80px;
+max-width:1100px;
+margin:auto;
+padding-left:16px;
+padding-right:16px;
+}
+
+section{display:none}
+section.active{display:block}
+
+#homeHeader{
+display:none;
+text-align:center;
+margin-top:120px;
+}
+#homeHeader.active{display:block}
+
+/* CHAT */
+.chat-box{background:var(--card);padding:12px;border-radius:6px;}
+.chat-feed{max-height:350px;overflow:auto;margin-bottom:10px;}
+.msg{padding:6px 0;border-bottom:1px solid #222;}
+.chat-input input{
+width:100%;
+padding:10px;
+background:#1e1e1e;
+border:none;
+color:white;
+}
+.permission-msg{
+margin-top:8px;
+font-size:13px;
+color:var(--error);
+}
+
+/* TEAM */
+.team-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+gap:16px;
+}
+
+.member{
+background:var(--card);
+padding:16px;
+border-radius:8px;
+}
+
+.member-top{
+display:flex;
+gap:15px;
+align-items:flex-start;
+}
+
+.avatar{
+width:90px;
+height:90px;
+border-radius:50%;
+background:#333;
+background-size:cover;
+background-position:center;
+flex-shrink:0;
+cursor:pointer;
+}
+
+.member-info h4{
+margin:0;
+font-size:18px;
+}
+
+.role{
+font-size:14px;
+color:var(--muted);
+margin-top:4px;
+}
+
+.bio{
+margin-top:12px;
+font-size:14px;
+color:#ccc;
+white-space:pre-line;
+}
+
+.contact{
+margin-top:8px;
+font-size:13px;
+color:#aaa;
+}
+
+.edit-btn{
+margin-top:12px;
+background:var(--accent);
+border:none;
+color:white;
+padding:6px;
+cursor:pointer;
+width:100%;
+}
+
+/* AUTH */
+.auth-box{
+max-width:420px;margin:40px auto;
+background:var(--card);padding:20px;border-radius:6px;
+}
+
+.auth-box input,.auth-box button{
+width:100%;padding:10px;margin-top:10px;
+background:#1e1e1e;color:white;border:none;
+}
+
+.auth-box button{background:var(--accent);cursor:pointer}
+
+.error-msg{
+margin-top:10px;
+color:var(--error);
+font-size:13px;
+}
+.success-msg{
+margin-top:10px;
+color:#4dff88;
+font-size:13px;
+}
+
+/* MODAL */
+.modal{
+position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:200;
+}
+.modal-content{
+background:var(--card);padding:20px;border-radius:8px;width:350px;
+display:flex;flex-direction:column;
+gap:10px;
+}
+.modal-content input, .modal-content select{
+padding:8px;
+background:#1e1e1e;color:white;border:none;width:100%;
+}
+.modal-content button{
+padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="menu-btn" id="menuBtn">☰</div>
+</header>
+
+<div id="overlay"></div>
+
+<div id="sidemenu">
+  <a data-page="home">Home</a>
+  <a data-page="projects">Projecten</a>
+  <a data-page="team">Team</a>
+  <a data-page="contact">Contact</a>
+  <a data-page="donations">Donaties</a>
+  <a id="authBtn">Inloggen</a>
+</div>
+
+<main>
+
+<div id="homeHeader">
+<h1>TAHIRI</h1>
+<p>De Tahiri Site</p>
+</div>
+
+<section id="home" class="active"></section>
+
+<section id="projects">
+<h2>Projecten – Live Chat</h2>
+<div class="chat-box">
+<div class="chat-feed" id="chatFeed"></div>
+<div class="chat-input">
+<input id="chatInput" placeholder="Typ bericht...">
+</div>
+<div id="chatPermissionMsg" class="permission-msg"></div>
+</div>
+</section>
+
+<section id="team">
+<h2>Team</h2>
+<div class="team-grid" id="teamGrid"></div>
+</section>
+
+<section id="contact">
+<h2>Contact</h2>
+<p>Mail: TahiriBusiness@gmail.com</p>
+<p>Tiktok - TahiriBusiness</p>
+<p>Instagram - TahiriBusiness</p>
+<p>Telegram - TahiriBusiness</p>
+<p>Youtube - TahiriBusiness</p>
+</section>
+
+<section id="donations">
+<h2>Donaties</h2>
+<p>Soon.</p>
+</section>
+
+<section id="login">
+<div class="auth-box">
+<h2>Inloggen</h2>
+<input id="loginIdentifier" placeholder="Naam of email">
+<input id="loginPass" type="password" placeholder="Wachtwoord">
+<button id="loginBtn">Inloggen</button>
+<div id="loginMsg" class="error-msg"></div>
+
+<hr style="margin:20px 0;border:1px solid #222">
+
+<h2>Account maken</h2>
+<input id="regName" placeholder="Accountnaam">
+<input id="regEmail" placeholder="Email">
+<input id="regPass" type="password" placeholder="Wachtwoord">
+<button id="regBtn">Account maken</button>
+<div id="regMsg"></div>
+</div>
+</section>
+
+<!-- MODAL -->
+<div class="modal" id="editModal">
+<div class="modal-content">
+<h3>Profiel Bewerken</h3>
+<input id="modalName" placeholder="Naam">
+<input id="modalEmail" placeholder="Email (privé)">
+<input id="modalBio" placeholder="Bio / contact info">
+<select id="modalRole">
+<option value="visitor">Visitor</option>
+<option value="member">Member</option>
+<option value="leader">Leader</option>
+<option value="founder">Founder</option>
+</select>
+<input type="file" id="modalAvatar">
+<button onclick="saveEdit()">Opslaan</button>
+<button onclick="closeModal()">Annuleren</button>
+</div>
+</div>
+
+</main>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
 // Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCOi0LZ1aHbb2wJuVkGfGZL1FGzXkY49FA",
@@ -319,12 +673,13 @@ const regPass = document.getElementById("regPass");
 
 const loginIdentifier = document.getElementById("loginIdentifier");
 const loginPass = document.getElementById("loginPass");
-
 const loginBtn = document.getElementById("loginBtn");
-loginBtn.addEventListener("click", login);
+const regBtn = document.getElementById("regBtn");
 
-const registerBtn = document.getElementById("registerBtn");
-registerBtn.addEventListener("click", register);
+// Event listeners
+authBtn.addEventListener("click", handleAuth);
+loginBtn.addEventListener("click", login);
+regBtn.addEventListener("click", register);
 
 // Menu en pagina's
 const menuBtn = document.getElementById("menuBtn");
@@ -412,10 +767,21 @@ function saveUsers(){
 
 // Auth helpers
 function updateAuthButton(){ authBtn.innerText=current?"Uitloggen":"Inloggen"; }
+function handleAuth(){
+  if(current){
+    current = null;
+    updatePermissions();
+    updateAuthButton();
+    loadTeam();
+    openPage("home");
+  } else {
+    openPage("login");
+  }
+}
 
 // Register
 function register(){
-  regMsg.innerHTML=""; 
+  regMsg.innerHTML="";
   const name = regName.value.trim();
   const email = regEmail.value.trim();
   const pass = regPass.value.trim();
@@ -424,12 +790,10 @@ function register(){
     regMsg.innerHTML = "<div class='error-msg'>Vul alle velden in.</div>";
     return;
   }
-
   if(users.find(u => u.email === email)){
     regMsg.innerHTML = "<div class='error-msg'>Email bestaat al.</div>";
     return;
   }
-
   users.push({
     id: crypto.randomUUID(),
     name,
@@ -441,10 +805,8 @@ function register(){
     bio: "",
     contact: ""
   });
-
-  saveUsers(); 
+  saveUsers();
   regMsg.innerHTML = "<div class='success-msg'>Account succesvol aangemaakt!</div>";
-
   regName.value = "";
   regEmail.value = "";
   regPass.value = "";
@@ -452,32 +814,19 @@ function register(){
 
 // Login
 function login(){
-  loginMsg.innerHTML=""; 
+  loginMsg.innerHTML="";
   const id = loginIdentifier.value.trim();
   const pass = loginPass.value.trim();
-
-  if(!id || !pass){
-    loginMsg.innerText = "Vul alle velden in."; 
-    return;
-  }
-
-  const user = users.find(u => u.email === id || u.name === id);
-  if(!user){
-    loginMsg.innerText = "Account niet gevonden."; 
-    return;
-  }
-
-  if(user.pass !== pass){
-    loginMsg.innerText = "Wachtwoord klopt niet."; 
-    return;
-  }
-
-  current = user; 
-  updatePermissions(); 
-  updateAuthButton(); 
-  loadTeam(); 
+  if(!id || !pass){ loginMsg.innerText="Vul alle velden in."; return; }
+  const user = users.find(u => u.email===id || u.name===id);
+  if(!user){ loginMsg.innerText="Account niet gevonden."; return; }
+  if(user.pass!==pass){ loginMsg.innerText="Wachtwoord klopt niet."; return; }
+  current = user;
+  updatePermissions();
+  updateAuthButton();
+  loadTeam();
   openPage("home");
-  loginMsg.innerText = "";
+  loginMsg.innerText="";
 }
 
 // Permissions
@@ -518,7 +867,7 @@ function loadTeam(){
     teamGrid.innerHTML+=`
       <div class="member">
         <div class="member-top">
-          <div class="avatar" style="background-image:url('${u.avatar||DEFAULT_AVATAR}')" onclick="openEdit('${u.id}')"></div>
+          <div class="avatar" style="background-image:url('${u.avatar||DEFAULT_AVATAR}')"></div>
           <div class="member-info">
             <h4>${u.name}</h4>
             <div class="role">${u.role}</div>
@@ -564,6 +913,7 @@ function saveEdit(){
 
 // Start
 init();
+
 </script>
 
 </body>
