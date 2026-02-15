@@ -4,38 +4,170 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tahiri</title>
+
 <style>
-:root{--bg:#0b0b0b;--card:#141414;--accent:#7a0000;--text:#f2f2f2;--muted:#9a9a9a;}
+:root{
+--bg:#0b0b0b;
+--card:#141414;
+--accent:#7a0000;
+--text:#f2f2f2;
+--muted:#9a9a9a;
+}
+
 *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
 body{margin:0;background:var(--bg);color:var(--text);}
-header{position:fixed;top:0;left:0;width:100%;height:60px;display:flex;align-items:center;padding:0 16px;z-index:100;}
+
+header{
+position:fixed;top:0;left:0;width:100%;height:60px;
+display:flex;align-items:center;padding:0 16px;z-index:100;
+}
+
 .menu-btn{font-size:26px;cursor:pointer;}
-#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;}
-#sidemenu{position:fixed;top:0;left:-260px;width:260px;height:100%;background:#0f0f0f;padding:20px;transition:.3s;z-index:100;}
-#sidemenu a{display:block;padding:12px 0;color:var(--text);text-decoration:none;cursor:pointer;}
+
+#overlay{
+display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;
+}
+
+#sidemenu{
+position:fixed;top:0;left:-260px;width:260px;height:100%;
+background:#0f0f0f;padding:20px;transition:.3s;z-index:100;
+}
+
+#sidemenu a{
+display:block;padding:12px 0;color:var(--text);
+text-decoration:none;cursor:pointer;
+}
+
 #sidemenu a:hover{color:var(--accent)}
-main{padding-top:80px;max-width:1100px;margin:auto;padding:0 16px;}
-.auth-box{max-width:420px;margin:40px auto;background:var(--card);padding:20px;border-radius:6px;}
-.auth-box input,.auth-box button,select,textarea{width:100%;padding:10px;margin-top:10px;background:#1e1e1e;color:white;border:none;}
-.auth-box button{background:var(--accent);cursor:pointer;}
-.chat-box{background:var(--card);padding:10px;border-radius:6px;}
-.chat-feed{max-height:350px;overflow:auto;margin-bottom:10px;}
-.msg{padding:6px 0;border-bottom:1px solid #222;}
-.chat-input{display:flex;}
-.chat-input input{flex:1;padding:8px;background:#1e1e1e;border:none;color:white;}
-.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;}
-.member{background:var(--card);padding:12px;border-radius:6px;}
-.edit-btn{margin-top:6px;background:var(--accent);border:none;color:white;padding:6px;cursor:pointer;width:100%;}
-.avatar{width:80px;height:80px;border-radius:50%;background:#333;background-size:cover;background-position:center;margin-bottom:10px;}
-.rank{display:inline-block;background:var(--accent);padding:2px 6px;font-size:12px;margin-top:6px;}
+
+main{
+padding-top:80px;
+max-width:1100px;
+margin:auto;
+padding-left:16px;
+padding-right:16px;
+}
+
 section{display:none}
 section.active{display:block}
-#home-welcome{min-height:calc(100vh - 60px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;}
+
+/* HOME */
+#home{
+min-height:calc(100vh - 60px);
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+}
+
+/* CHAT */
+.chat-box{background:var(--card);padding:12px;border-radius:6px;}
+.chat-feed{max-height:350px;overflow:auto;margin-bottom:10px;}
+.msg{padding:6px 0;border-bottom:1px solid #222;}
+.chat-input input{
+width:100%;
+padding:10px;
+background:#1e1e1e;
+border:none;
+color:white;
+}
+
+/* TEAM */
+.team-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+gap:16px;
+}
+
+.member{
+background:var(--card);
+padding:16px;
+border-radius:8px;
+}
+
+.member-top{
+display:flex;
+gap:15px;
+align-items:flex-start;
+}
+
+.avatar{
+width:90px;
+height:90px;
+border-radius:50%;
+background:#333;
+background-size:cover;
+background-position:center;
+flex-shrink:0;
+}
+
+.member-info h4{
+margin:0;
+font-size:18px;
+}
+
+.role{
+font-size:14px;
+color:var(--muted);
+margin-top:4px;
+}
+
+.bio{
+margin-top:12px;
+font-size:14px;
+color:#ccc;
+white-space:pre-line;
+}
+
+.edit-btn{
+margin-top:12px;
+background:var(--accent);
+border:none;
+color:white;
+padding:6px;
+cursor:pointer;
+width:100%;
+}
+
+/* AUTH */
+.auth-box{
+max-width:420px;margin:40px auto;
+background:var(--card);padding:20px;border-radius:6px;
+}
+
+.auth-box input,.auth-box button{
+width:100%;padding:10px;margin-top:10px;
+background:#1e1e1e;color:white;border:none;
+}
+
+.auth-box button{background:var(--accent);cursor:pointer}
+
 /* EDIT MODAL */
-#editModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;justify-content:center;align-items:center;}
-#editBox{background:var(--card);padding:20px;border-radius:8px;width:350px;}
+#editModal{
+display:none;position:fixed;inset:0;
+background:rgba(0,0,0,.7);z-index:200;
+justify-content:center;align-items:center;
+}
+
+#editBox{
+background:var(--card);
+padding:20px;
+border-radius:8px;
+width:350px;
+}
+
+#editBox input,#editBox textarea,#editBox select{
+width:100%;
+padding:10px;
+margin-top:10px;
+background:#1e1e1e;
+color:white;
+border:none;
+}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -56,10 +188,8 @@ section.active{display:block}
 <main>
 
 <section id="home" class="active">
-<div id="home-welcome">
 <h1>TAHIRI</h1>
 <p>De Tahiri Website.</p>
-</div>
 </section>
 
 <section id="projects">
@@ -67,7 +197,7 @@ section.active{display:block}
 <div class="chat-box">
 <div class="chat-feed" id="chatFeed"></div>
 <div class="chat-input">
-<input id="chatInput" placeholder="Typ bericht..." disabled>
+<input id="chatInput" placeholder="Typ bericht...">
 </div>
 </div>
 </section>
@@ -80,7 +210,6 @@ section.active{display:block}
 <section id="contact">
 <h2>Contact</h2>
 <p>Mail: TahiriBusiness@gmail.com</p>
-<p>Socials:</p>
 <p>Tiktok - TahiriBusiness</p>
 <p>Instagram - TahiriBusiness</p>
 <p>Telegram - TahiriBusiness</p>
@@ -112,8 +241,8 @@ section.active{display:block}
 <div id="editModal">
 <div id="editBox">
 <h3>Profiel bewerken</h3>
-<input id="editName" placeholder="Naam">
-<textarea id="editContact" placeholder="Contact info"></textarea>
+<input id="editName">
+<textarea id="editContact" placeholder="Contact info / bio"></textarea>
 <select id="editRole">
 <option value="founder">Founder</option>
 <option value="leader">Leader</option>
@@ -127,20 +256,38 @@ section.active{display:block}
 </div>
 
 <script>
-let DEFAULT_AVATAR="";
-let users=JSON.parse(localStorage.getItem("users")||"[]");
-let current=JSON.parse(localStorage.getItem("current"));
+let DEFAULT_AVATAR="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIg...";
+let users=[];
+let current=null;
 let feed=JSON.parse(localStorage.getItem("feed")||"[]");
 let editingId=null;
 
-/* 6 standaard profielen */
-if(users.length===0){
-let roles=["founder","leader","member","member","visitor","visitor"];
-for(let i=0;i<6;i++){
-users.push({id:crypto.randomUUID(),name:"Member "+(i+1),email:"user"+i+"@mail.com",pass:"1234",role:roles[i],avatar:DEFAULT_AVATAR,contact:""});
-}
+/* FORCE 6 STANDAARD PROFIELEN */
+function initUsers(){
+let stored=JSON.parse(localStorage.getItem("users")||"[]");
+if(stored.length<6){
+users=[
+{id:crypto.randomUUID(),name:"Founder",email:"f@t.com",pass:"1234",role:"founder",avatar:DEFAULT_AVATAR,contact:"Eigenaar"},
+{id:crypto.randomUUID(),name:"Leader",email:"l@t.com",pass:"1234",role:"leader",avatar:DEFAULT_AVATAR,contact:"Co-owner"},
+{id:crypto.randomUUID(),name:"Member 1",email:"m1@t.com",pass:"1234",role:"member",avatar:DEFAULT_AVATAR,contact:""},
+{id:crypto.randomUUID(),name:"Member 2",email:"m2@t.com",pass:"1234",role:"member",avatar:DEFAULT_AVATAR,contact:""},
+{id:crypto.randomUUID(),name:"Visitor 1",email:"v1@t.com",pass:"1234",role:"visitor",avatar:DEFAULT_AVATAR,contact:""},
+{id:crypto.randomUUID(),name:"Visitor 2",email:"v2@t.com",pass:"1234",role:"visitor",avatar:DEFAULT_AVATAR,contact:""}
+];
 localStorage.setItem("users",JSON.stringify(users));
+}else{
+users=stored;
 }
+}
+initUsers();
+
+current=JSON.parse(localStorage.getItem("current"));
+
+function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
+
+/* MENU */
+menuBtn.onclick=()=>toggleMenu();
+overlay.onclick=()=>toggleMenu();
 
 function toggleMenu(){
 const m=document.getElementById("sidemenu");
@@ -148,8 +295,6 @@ const o=document.getElementById("overlay");
 if(m.style.left==="0px"){m.style.left="-260px";o.style.display="none";}
 else{m.style.left="0px";o.style.display="block";}
 }
-menuBtn.onclick=toggleMenu;
-overlay.onclick=toggleMenu;
 
 function openPage(id){
 document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
@@ -157,14 +302,12 @@ document.getElementById(id).classList.add("active");
 toggleMenu();
 }
 
-function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
-
+/* LOGIN */
 function register(){
 const name=regName.value.trim();
 const email=regEmail.value.trim();
 const pass=regPass.value;
 if(!name||!email||!pass)return alert("Vul alles in");
-if(users.find(u=>u.email===email))return alert("Email bestaat al");
 users.push({id:crypto.randomUUID(),name,email,pass,role:"visitor",avatar:DEFAULT_AVATAR,contact:""});
 saveUsers();
 alert("Account gemaakt");
@@ -177,13 +320,14 @@ const user=users.find(u=>(u.email===id||u.name===id)&&u.pass===pass);
 if(!user)return alert("Foute login");
 current=user;
 localStorage.setItem("current",JSON.stringify(current));
-if(["member","leader","founder"].includes(current.role))chatInput.disabled=false;
+updateChatAccess();
 updateLoginBtn();
 loadTeam();
 openPage("home");
 }
 
 function logout(){localStorage.removeItem("current");location.reload();}
+
 function updateLoginBtn(){
 const btn=document.getElementById("loginBtn");
 if(!current){btn.textContent="Inloggen";btn.onclick=()=>openPage("login");}
@@ -192,6 +336,11 @@ else{btn.textContent="Uitloggen";btn.onclick=logout;}
 updateLoginBtn();
 
 /* CHAT */
+function updateChatAccess(){
+chatInput.disabled=!(current && ["member","leader","founder"].includes(current.role));
+}
+updateChatAccess();
+
 function renderChat(){
 chatFeed.innerHTML="";
 feed.forEach(m=>{
@@ -201,7 +350,7 @@ chatFeed.innerHTML+=`<div class="msg"><b>${m.name}</b>: ${m.text}</div>`;
 renderChat();
 
 chatInput.addEventListener("keypress",e=>{
-if(e.key==="Enter" && current && ["member","leader","founder"].includes(current.role)){
+if(e.key==="Enter" && !chatInput.disabled && chatInput.value.trim()!==""){
 feed.push({name:current.name,text:chatInput.value});
 localStorage.setItem("feed",JSON.stringify(feed));
 chatInput.value="";
@@ -220,22 +369,28 @@ if(current.role==="member" && current.id===u.id)canEdit=true;
 }
 teamGrid.innerHTML+=`
 <div class="member">
-<div class="avatar" style="background-image:url('${u.avatar||""}')"></div>
+<div class="member-top">
+<div class="avatar" style="background-image:url('${u.avatar||DEFAULT_AVATAR}')"></div>
+<div class="member-info">
 <h4>${u.name}</h4>
-<div class="rank">${u.role}</div>
+<div class="role">${u.role}</div>
+</div>
+</div>
+<div class="bio">${u.contact||""}</div>
 ${canEdit?`<button class="edit-btn" onclick='openEdit("${u.id}")'>Edit</button>`:""}
 </div>`;
 });
 }
 loadTeam();
 
+/* EDIT */
 function openEdit(id){
 editingId=id;
 let u=users.find(x=>x.id===id);
 editName.value=u.name;
 editContact.value=u.contact;
 editRole.value=u.role;
-document.getElementById("editModal").style.display="flex";
+editModal.style.display="flex";
 }
 
 function closeEdit(){editModal.style.display="none";}
@@ -245,23 +400,19 @@ let u=users.find(x=>x.id===editingId);
 u.name=editName.value;
 u.contact=editContact.value;
 u.role=editRole.value;
-
-let file=document.getElementById("editAvatar").files[0];
+let file=editAvatar.files[0];
 if(file){
 let reader=new FileReader();
-reader.onload=function(e){
+reader.onload=e=>{
 u.avatar=e.target.result;
-saveUsers();
-loadTeam();
-closeEdit();
+saveUsers();loadTeam();closeEdit();
 };
 reader.readAsDataURL(file);
 }else{
-saveUsers();
-loadTeam();
-closeEdit();
+saveUsers();loadTeam();closeEdit();
 }
 }
 </script>
+
 </body>
 </html>
