@@ -1,78 +1,311 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
-  <title>Tahiri</title>
-  <style>
-  body { margin:0; font-family: Arial, sans-serif; }
-  .sidebar {
-    height: 100%;
-    width: 0;
-    position: fixed;
-    z-index: 2;
-    top: 0;
-    left: 0;
-    background-color: #111;
-    overflow-x: hidden;
-    transition: 0.3s;
-    padding-top: 60px;
-  }
-  .sidebar a {
-    padding: 10px 15px;
-    text-decoration: none;
-    font-size: 18px;
-    color: #fff;
-    display: block;
-    transition: 0.2s;
-  }
-  .sidebar a:hover { background-color: #575757; }
-  .sidebar .closebtn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 30px;
-  }
-  .openbtn {
-    font-size: 30px;
-    cursor: pointer;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 3;
-    color: #111;
-  }
-  .content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    text-align: center;
-  }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tahiri</title>
+
+<style>
+:root{
+  --bg:#0b0b0b;
+  --card:#141414;
+  --accent:#7a0000;
+  --text:#f2f2f2;
+  --muted:#9a9a9a;
+}
+
+*{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* HEADER */
+header{
+  position:fixed;
+  top:0;left:0;
+  width:100%;
+  height:60px;
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  z-index:100;
+}
+.menu-btn{
+  font-size:26px;
+  cursor:pointer;
+}
+
+/* SIDEMENU */
+#overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  z-index:90;
+}
+#sidemenu{
+  position:fixed;
+  top:0;left:-260px;
+  width:260px;
+  height:100%;
+  background:#0f0f0f;
+  padding:20px;
+  transition:.3s;
+  z-index:100;
+}
+#sidemenu a{
+  display:block;
+  padding:12px 0;
+  color:var(--text);
+  text-decoration:none;
+}
+#sidemenu a:hover{color:var(--accent)}
+
+/* MAIN */
+main{
+  padding-top:80px;
+  max-width:1100px;
+  margin:auto;
+  padding-left:16px;
+  padding-right:16px;
+}
+
+/* HOME */
+#home{
+  text-align:center;
+  margin-top:40px;
+}
+#home h1{
+  font-size:48px;
+  margin-bottom:10px;
+}
+#home p{color:var(--muted)}
+
+/* AUTH */
+.auth-box{
+  max-width:400px;
+  margin:40px auto;
+  background:var(--card);
+  padding:20px;
+  border-radius:6px;
+}
+.auth-box input, .auth-box button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:#1e1e1e;
+  color:white;
+  border:none;
+}
+.auth-box button{
+  background:var(--accent);
+  cursor:pointer;
+}
+
+/* CHAT */
+.chat-box{
+  background:var(--card);
+  padding:10px;
+  border-radius:6px;
+}
+.chat-feed{
+  max-height:300px;
+  overflow:auto;
+  margin-bottom:10px;
+}
+.msg{
+  padding:6px 0;
+  border-bottom:1px solid #222;
+}
+.chat-input{
+  display:flex;
+}
+.chat-input input{
+  flex:1;
+  padding:8px;
+  background:#1e1e1e;
+  border:none;
+  color:white;
+}
+
+/* TEAM */
+.team-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:16px;
+}
+.member{
+  background:var(--card);
+  padding:12px;
+  border-radius:6px;
+}
+.avatar{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:#333;
+  background-size:cover;
+  background-position:center;
+}
+.rank{
+  display:inline-block;
+  background:var(--accent);
+  padding:2px 6px;
+  font-size:12px;
+  margin-top:6px;
+}
+
+/* HIDE */
+section{display:none}
+section.active{display:block}
+</style>
 </head>
+
 <body>
 
-<!-- Sidebar menu -->
-<div id="mySidebar" class="sidebar">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-  <a href="index.html">Home</a>
-  <a href="projecten.html">Projecten</a>
-  <a href="contact.html">Contact</a>
-  <a href="donaties.html">Donaties</a>
+<header>
+  <div class="menu-btn" onclick="toggleMenu()">☰</div>
+</header>
+
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<div id="sidemenu">
+  <a onclick="openPage('home')">Home</a>
+  <a onclick="openPage('projects')">Projecten</a>
+  <a onclick="openPage('contact')">Contact</a>
+  <a onclick="openPage('donations')">Donaties</a>
+  <a onclick="openPage('team')">Team</a>
 </div>
 
-<div id="main">
-  <span class="openbtn" onclick="openNav()">☰</span>
-  <div class="content">
-    <h1>Welkom</h1>
-    <p>Tahiri Mafia.</p>
+<main>
+
+<section id="home" class="active">
+  <h1>Welkom</h1>
+  <p>Tahiri collectief</p>
+</section>
+
+<section id="auth">
+  <div class="auth-box">
+    <h2>Login / Registratie</h2>
+    <input id="name" placeholder="Accountnaam">
+    <input id="email" placeholder="Email">
+    <input id="pass" type="password" placeholder="Wachtwoord">
+    <button onclick="register()">Account maken</button>
+    <button onclick="login()">Inloggen</button>
   </div>
-</div>
+</section>
+
+<section id="projects">
+  <h2>Projecten – Live feed</h2>
+  <div class="chat-box">
+    <div class="chat-feed" id="chatFeed"></div>
+    <div class="chat-input">
+      <input id="chatInput" placeholder="Typ bericht..." disabled>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <p>Email: tahiri.collective@gmail.com</p>
+  <p>Instagram / X / Telegram</p>
+</section>
+
+<section id="donations">
+  <h2>Donaties</h2>
+  <button style="padding:10px;background:var(--accent);border:none;color:white">
+    Anoniem doneren
+  </button>
+</section>
+
+<section id="team">
+  <h2>Team</h2>
+  <div class="team-grid" id="teamGrid"></div>
+</section>
+
+</main>
 
 <script>
-function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
-function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+let users = JSON.parse(localStorage.getItem("users")||"[]");
+let current = JSON.parse(localStorage.getItem("current"));
+
+function toggleMenu(){
+  let m=document.getElementById("sidemenu");
+  let o=document.getElementById("overlay");
+  let open=m.style.left==="0px";
+  m.style.left=open?"-260px":"0px";
+  o.style.display=open?"none":"block";
+}
+
+function openPage(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  toggleMenu();
+}
+
+function register(){
+  let u={
+    name:name.value||"Anoniem",
+    email:email.value,
+    pass:pass.value,
+    role:"visitor",
+    avatar:"",
+    contact:""
+  };
+  users.push(u);
+  localStorage.setItem("users",JSON.stringify(users));
+  alert("Account aangemaakt");
+}
+
+function login(){
+  current=users.find(u=>(u.email===email.value||u.name===name.value)&&u.pass===pass.value);
+  if(!current){alert("Onjuist");return;}
+  localStorage.setItem("current",JSON.stringify(current));
+  document.getElementById("auth").style.display="none";
+  if(current.role!=="visitor"){
+    chatInput.disabled=false;
+  }
+  loadTeam();
+}
+
+let feed=JSON.parse(localStorage.getItem("feed")||"[]");
+function renderChat(){
+  chatFeed.innerHTML="";
+  feed.forEach(m=>{
+    chatFeed.innerHTML+=`<div class="msg"><b>${m.name}</b>: ${m.text}</div>`;
+  });
+}
+chatInput?.addEventListener("keypress",e=>{
+  if(e.key==="Enter"){
+    feed.push({name:current.name,text:chatInput.value});
+    localStorage.setItem("feed",JSON.stringify(feed));
+    chatInput.value="";
+    renderChat();
+  }
+});
+renderChat();
+
+function loadTeam(){
+  teamGrid.innerHTML="";
+  users.forEach(u=>{
+    teamGrid.innerHTML+=`
+    <div class="member">
+      <div class="avatar" style="background-image:url('${u.avatar}')"></div>
+      <h4>${u.name||"Anoniem"}</h4>
+      <div class="rank">${u.role}</div>
+    </div>`;
+  });
+}
+loadTeam();
+
+if(!current){
+  openPage("auth");
+}else{
+  if(current.role!=="visitor") chatInput.disabled=false;
+}
 </script>
 
 </body>
 </html>
-
