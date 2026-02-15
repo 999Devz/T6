@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tahiri</title>
-
 <style>
 :root{--bg:#0b0b0b;--card:#141414;--accent:#7a0000;--text:#f2f2f2;--muted:#9a9a9a;}
 *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
@@ -25,47 +24,71 @@ main{padding-top:80px;max-width:1100px;margin:auto;padding:0 16px;}
 .chat-input{display:flex;}
 .chat-input input{flex:1;padding:8px;background:#1e1e1e;border:none;color:white;}
 .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;}
-.member{background:var(--card);padding:12px;border-radius:6px;}
+.member{background:var(--card);padding:12px;border-radius:6px;position:relative;}
+.edit-btn{margin-top:6px;background:var(--accent);border:none;color:white;padding:4px 6px;cursor:pointer;}
 .avatar{width:80px;height:80px;border-radius:50%;background:#333;background-size:cover;background-position:center;}
 .rank{display:inline-block;background:var(--accent);padding:2px 6px;font-size:12px;margin-top:6px;}
 section{display:none}
 section.active{display:block}
-
-/* HOME CENTRAAL EN SCROLLBAAR */
-#home{
-  text-align:center;
+/* HOME CENTRAAL, SCROLLBAAR, VOORALLE PAGINA CONTENT */
+#home-content{
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+#home-welcome{
   min-height:calc(100vh - 60px);
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
+  text-align:center;
   padding:20px;
 }
 </style>
 </head>
-
 <body>
 
 <header>
   <div class="menu-btn" id="menuBtn">☰</div>
 </header>
-
 <div id="overlay"></div>
-
 <div id="sidemenu">
   <a onclick="openPage('home')">Home</a>
   <a onclick="openPage('projects')">Projecten</a>
+  <a onclick="openPage('team')">Team</a>
   <a onclick="openPage('contact')">Contact</a>
   <a onclick="openPage('donations')">Donaties</a>
-  <a onclick="openPage('team')">Team</a>
   <a id="loginBtn" onclick="openPage('login')">Inloggen</a>
 </div>
 
 <main>
 
 <section id="home" class="active">
-  <h1>Welkom</h1>
-  <p>Tahiri collectief</p>
+  <div id="home-content">
+    <div id="home-welcome">
+      <h1>Welkom</h1>
+      <p>Tahiri collectief</p>
+    </div>
+
+    <section id="home-team">
+      <h2>Team</h2>
+      <div class="team-grid" id="homeTeamGrid"></div>
+    </section>
+
+    <section id="home-contact">
+      <h2>Contact</h2>
+      <p>Email: tahiri.collective@gmail.com</p>
+      <p>Instagram / X / Telegram</p>
+    </section>
+
+    <section id="home-donations">
+      <h2>Donaties</h2>
+      <button style="padding:10px;background:var(--accent);border:none;color:white">
+        Anoniem doneren
+      </button>
+    </section>
+  </div>
 </section>
 
 <section id="login">
@@ -95,22 +118,24 @@ section.active{display:block}
   </div>
 </section>
 
-<section id="contact"><h2>Contact</h2></section>
-<section id="donations"><h2>Donaties</h2></section>
-
 <section id="team">
   <h2>Team</h2>
   <div class="team-grid" id="teamGrid"></div>
 </section>
 
+<section id="contact"><h2>Contact</h2></section>
+<section id="donations"><h2>Donaties</h2></section>
+
 </main>
 
 <script>
+let DEFAULT_AVATAR = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."; // hier base64 van je afbeelding
+
 let users=JSON.parse(localStorage.getItem("users")||"[]");
 let current=JSON.parse(localStorage.getItem("current"));
 let feed=JSON.parse(localStorage.getItem("feed")||"[]");
 
-/* Voeg standaard Dev profiel toe als nog niet aanwezig */
+/* Voeg standaard Dev profiel toe */
 if(!users.find(u=>u.name==="Dev")){
   users.unshift({
     id:crypto.randomUUID(),
@@ -118,13 +143,13 @@ if(!users.find(u=>u.name==="Dev")){
     email:"dev@tahiri.com",
     pass:"devpass",
     role:"founder",
-    avatar:"",
+    avatar:DEFAULT_AVATAR,
     contact:""
   });
   localStorage.setItem("users",JSON.stringify(users));
 }
 
-/* HAMBURGER MENU */
+/* MENU */
 function toggleMenu(){
   const m=document.getElementById("sidemenu");
   const o=document.getElementById("overlay");
@@ -135,14 +160,14 @@ document.getElementById("menuBtn").onclick=toggleMenu;
 document.getElementById("overlay").onclick=toggleMenu;
 
 function openPage(id){
-  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   toggleMenu();
 }
 
+/* REGISTER / LOGIN */
 function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
 
-/* REGISTRATIE */
 function register(){
   const name=regName.value.trim();
   const email=regEmail.value.trim();
@@ -151,13 +176,12 @@ function register(){
   if(!name||!email||!pass)return alert("Vul alles in");
   if(users.find(u=>u.email===email))return alert("Email bestaat al");
 
-  const user={id:crypto.randomUUID(),name,email,pass,role:"visitor",avatar:""};
+  const user={id:crypto.randomUUID(),name,email,pass,role:"visitor",avatar:DEFAULT_AVATAR,contact:""};
   users.push(user);
   saveUsers();
   alert("Account gemaakt, je kunt nu inloggen");
 }
 
-/* LOGIN */
 function login(){
   const id=loginIdentifier.value.trim();
   const pass=loginPass.value;
@@ -175,10 +199,11 @@ function login(){
 
   updateLoginBtn();
   loadTeam();
+  loadHomeTeam();
   openPage("home");
 }
 
-/* LOGIN KNOP UPDATEN */
+/* LOGIN BUTTON */
 function updateLoginBtn(){
   const btn=document.getElementById("loginBtn");
   if(!current){btn.textContent="Inloggen";btn.onclick=()=>openPage("login");}
@@ -208,40 +233,71 @@ chatInput.addEventListener("keypress",e=>{
   }
 });
 
-/* TEAM GRID MET EDIT KNOP VOOR LEADER/FOUNDER */
+/* TEAM GRID FUNCTIES */
 function loadTeam(){
   teamGrid.innerHTML="";
   users.forEach(u=>{
     let canEdit = current && ["leader","founder"].includes(current.role);
     teamGrid.innerHTML+=`
     <div class="member">
-      <div class="avatar" style="background-image:url('${u.avatar}')"></div>
+      <div class="avatar" style="background-image:url('${u.avatar || DEFAULT_AVATAR}')"></div>
       <h4>${u.name}</h4>
       <div class="rank">${u.role}</div>
-      ${canEdit ? `<button onclick='editProfile("${u.id}")'>Edit</button>` : ""}
+      ${canEdit?`<button class="edit-btn" onclick='editProfile("${u.id}")'>Edit</button>`:""}
+    </div>`;
+  });
+}
+
+function loadHomeTeam(){
+  const grid = document.getElementById("homeTeamGrid");
+  grid.innerHTML="";
+  users.forEach(u=>{
+    let canEdit = current && ["leader","founder"].includes(current.role);
+    grid.innerHTML+=`
+    <div class="member">
+      <div class="avatar" style="background-image:url('${u.avatar || DEFAULT_AVATAR}')"></div>
+      <h4>${u.name}</h4>
+      <div class="rank">${u.role}</div>
+      ${canEdit?`<button class="edit-btn" onclick='editProfile("${u.id}")'>Edit</button>`:""}
     </div>`;
   });
 }
 loadTeam();
+loadHomeTeam();
 
+/* EDIT PROFIEL MET FOTO UPLOAD */
 function editProfile(id){
   let u = users.find(x=>x.id===id);
   if(!u) return;
+
   let newName = prompt("Nieuwe naam:", u.name);
-  let newAvatar = prompt("Nieuwe avatar URL:", u.avatar);
   let newContact = prompt("Nieuwe contact info:", u.contact);
+
+  // File input voor foto
+  let fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = "image/*";
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
+    if(file){
+      const reader = new FileReader();
+      reader.onload = function(ev){
+        u.avatar = ev.target.result; // base64 opgeslagen
+        localStorage.setItem("users",JSON.stringify(users));
+        loadTeam();
+        loadHomeTeam();
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  fileInput.click();
+
   if(newName) u.name=newName;
-  if(newAvatar) u.avatar=newAvatar;
   if(newContact) u.contact=newContact;
   localStorage.setItem("users",JSON.stringify(users));
   loadTeam();
-}
-
-/* Zet chat input actief als current rol niet visitor */
-if(current && ["member","leader","founder"].includes(current.role)){
-  chatInput.disabled=false;
+  loadHomeTeam();
 }
 </script>
-
 </body>
 </html>
