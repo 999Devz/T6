@@ -13,151 +13,30 @@
   --text:#f2f2f2;
   --muted:#9a9a9a;
 }
-
 *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-}
-
-/* HEADER */
-header{
-  position:fixed;
-  top:0;left:0;
-  width:100%;
-  height:60px;
-  display:flex;
-  align-items:center;
-  padding:0 16px;
-  z-index:100;
-}
-.menu-btn{
-  font-size:26px;
-  cursor:pointer;
-}
-
-/* SIDEMENU */
-#overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  z-index:90;
-}
-#sidemenu{
-  position:fixed;
-  top:0;left:-260px;
-  width:260px;
-  height:100%;
-  background:#0f0f0f;
-  padding:20px;
-  transition:.3s;
-  z-index:100;
-}
-#sidemenu a{
-  display:block;
-  padding:12px 0;
-  color:var(--text);
-  text-decoration:none;
-}
+body{margin:0;background:var(--bg);color:var(--text);}
+header{position:fixed;top:0;left:0;width:100%;height:60px;display:flex;align-items:center;padding:0 16px;z-index:100;}
+.menu-btn{font-size:26px;cursor:pointer;}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;}
+#sidemenu{position:fixed;top:0;left:-260px;width:260px;height:100%;background:#0f0f0f;padding:20px;transition:.3s;z-index:100;}
+#sidemenu a{display:block;padding:12px 0;color:var(--text);text-decoration:none;cursor:pointer;}
 #sidemenu a:hover{color:var(--accent)}
-
-/* MAIN */
-main{
-  padding-top:80px;
-  max-width:1100px;
-  margin:auto;
-  padding-left:16px;
-  padding-right:16px;
-}
-
-/* HOME */
-#home{
-  text-align:center;
-  margin-top:40px;
-}
-#home h1{
-  font-size:48px;
-  margin-bottom:10px;
-}
+main{padding-top:80px;max-width:1100px;margin:auto;padding-left:16px;padding-right:16px;}
+#home{text-align:center;margin-top:40px;}
+#home h1{font-size:48px;margin-bottom:10px;}
 #home p{color:var(--muted)}
-
-/* AUTH */
-.auth-box{
-  max-width:400px;
-  margin:40px auto;
-  background:var(--card);
-  padding:20px;
-  border-radius:6px;
-}
-.auth-box input, .auth-box button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  background:#1e1e1e;
-  color:white;
-  border:none;
-}
-.auth-box button{
-  background:var(--accent);
-  cursor:pointer;
-}
-
-/* CHAT */
-.chat-box{
-  background:var(--card);
-  padding:10px;
-  border-radius:6px;
-}
-.chat-feed{
-  max-height:300px;
-  overflow:auto;
-  margin-bottom:10px;
-}
-.msg{
-  padding:6px 0;
-  border-bottom:1px solid #222;
-}
-.chat-input{
-  display:flex;
-}
-.chat-input input{
-  flex:1;
-  padding:8px;
-  background:#1e1e1e;
-  border:none;
-  color:white;
-}
-
-/* TEAM */
-.team-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-  gap:16px;
-}
-.member{
-  background:var(--card);
-  padding:12px;
-  border-radius:6px;
-}
-.avatar{
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  background:#333;
-  background-size:cover;
-  background-position:center;
-}
-.rank{
-  display:inline-block;
-  background:var(--accent);
-  padding:2px 6px;
-  font-size:12px;
-  margin-top:6px;
-}
-
-/* HIDE */
+.auth-box{max-width:400px;margin:40px auto;background:var(--card);padding:20px;border-radius:6px;}
+.auth-box input,.auth-box button{width:100%;padding:10px;margin-top:10px;background:#1e1e1e;color:white;border:none;}
+.auth-box button{background:var(--accent);cursor:pointer;}
+.chat-box{background:var(--card);padding:10px;border-radius:6px;}
+.chat-feed{max-height:300px;overflow:auto;margin-bottom:10px;}
+.msg{padding:6px 0;border-bottom:1px solid #222;}
+.chat-input{display:flex;}
+.chat-input input{flex:1;padding:8px;background:#1e1e1e;border:none;color:white;}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;}
+.member{background:var(--card);padding:12px;border-radius:6px;}
+.avatar{width:80px;height:80px;border-radius:50%;background:#333;background-size:cover;background-position:center;}
+.rank{display:inline-block;background:var(--accent);padding:2px 6px;font-size:12px;margin-top:6px;}
 section{display:none}
 section.active{display:block}
 </style>
@@ -177,9 +56,8 @@ section.active{display:block}
   <a onclick="openPage('contact')">Contact</a>
   <a onclick="openPage('donations')">Donaties</a>
   <a onclick="openPage('team')">Team</a>
-  <a onclick="openPage('auth')">Inloggen</a>
+  <a onclick="openPage('auth')" id="loginBtn">Inloggen</a>
 </div>
-
 
 <main>
 
@@ -191,8 +69,8 @@ section.active{display:block}
 <section id="auth">
   <div class="auth-box">
     <h2>Login / Registratie</h2>
-    <input id="name" placeholder="Accountnaam">
-    <input id="email" placeholder="Email">
+    <input id="name" placeholder="Accountnaam of email">
+    <input id="email" placeholder="Email (alleen registratie)">
     <input id="pass" type="password" placeholder="Wachtwoord">
     <button onclick="register()">Account maken</button>
     <button onclick="login()">Inloggen</button>
@@ -212,7 +90,6 @@ section.active{display:block}
 <section id="contact">
   <h2>Contact</h2>
   <p>Email: tahiri.collective@gmail.com</p>
-  <p>Instagram / X / Telegram</p>
 </section>
 
 <section id="donations">
@@ -232,95 +109,90 @@ section.active{display:block}
 <script>
 let users = JSON.parse(localStorage.getItem("users") || "[]");
 let current = JSON.parse(localStorage.getItem("current"));
+let feed = JSON.parse(localStorage.getItem("feed") || "[]");
 
-function saveUsers() {
+function saveUsers(){
   localStorage.setItem("users", JSON.stringify(users));
 }
 
-function register() {
-  const username = name.value.trim();
-  const mail = email.value.trim();
-  const password = pass.value;
-
-  if (!username || !mail || !password) {
-    alert("Vul alle velden in.");
-    return;
+function toggleMenu(){
+  const menu=document.getElementById("sidemenu");
+  const overlay=document.getElementById("overlay");
+  if(menu.style.left==="0px"){
+    menu.style.left="-260px";
+    overlay.style.display="none";
+  }else{
+    menu.style.left="0px";
+    overlay.style.display="block";
   }
+}
 
-  if (users.find(u => u.email === mail)) {
-    alert("Er bestaat al een account met deze email.");
-    return;
-  }
+function openPage(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  toggleMenu();
+}
 
-  const user = {
-    id: crypto.randomUUID(),
-    name: username,
-    email: mail,
-    pass: password, // frontend-only, later hashen in backend
-    role: "visitor",
-    avatar: "",
-    contact: ""
+function register(){
+  const username=name.value.trim();
+  const mail=email.value.trim();
+  const password=pass.value;
+
+  if(!username||!mail||!password)return alert("Vul alles in");
+
+  if(users.find(u=>u.email===mail))return alert("Email bestaat al");
+
+  const user={
+    id:crypto.randomUUID(),
+    name:username,
+    email:mail,
+    pass:password,
+    role:"visitor",
+    avatar:"",
+    contact:""
   };
 
   users.push(user);
   saveUsers();
-
-  alert("Account succesvol aangemaakt. Je kunt nu inloggen.");
-  name.value = "";
-  email.value = "";
-  pass.value = "";
+  alert("Account gemaakt");
 }
 
-function login() {
-  const identifier = name.value.trim();
-  const password = pass.value;
+function login(){
+  const identifier=name.value.trim();
+  const password=pass.value;
 
-  if (!identifier || !password) {
-    alert("Vul logingegevens in.");
-    return;
-  }
-
-  const user = users.find(
-    u =>
-      (u.email === identifier || u.name === identifier) &&
-      u.pass === password
+  const user=users.find(u=>
+    (u.email===identifier||u.name===identifier)&&u.pass===password
   );
 
-  if (!user) {
-    alert("Onjuiste gegevens.");
-    return;
-  }
+  if(!user)return alert("Fout");
 
-  current = user;
-  localStorage.setItem("current", JSON.stringify(current));
+  current=user;
+  localStorage.setItem("current",JSON.stringify(current));
 
-  alert(`Ingelogd als ${current.name}`);
-  document.getElementById("auth").style.display = "none";
-
-  if (current.role !== "visitor") {
-    chatInput.disabled = false;
-  }
+  if(current.role!=="visitor")chatInput.disabled=false;
 
   loadTeam();
+  updateLoginBtn();
+  openPage("home");
 }
 
-
-let feed=JSON.parse(localStorage.getItem("feed")||"[]");
 function renderChat(){
   chatFeed.innerHTML="";
   feed.forEach(m=>{
     chatFeed.innerHTML+=`<div class="msg"><b>${m.name}</b>: ${m.text}</div>`;
   });
 }
-chatInput?.addEventListener("keypress",e=>{
-  if(e.key==="Enter"){
+renderChat();
+
+chatInput.addEventListener("keypress",e=>{
+  if(e.key==="Enter"&&current){
     feed.push({name:current.name,text:chatInput.value});
     localStorage.setItem("feed",JSON.stringify(feed));
     chatInput.value="";
     renderChat();
   }
 });
-renderChat();
 
 function loadTeam(){
   teamGrid.innerHTML="";
@@ -335,26 +207,27 @@ function loadTeam(){
 }
 loadTeam();
 
-const loginLink = [...document.querySelectorAll("#sidemenu a")]
-  .find(a => a.textContent === "Inloggen");
-
-if(!current){
-  openPage("auth");
-  if(loginLink) loginLink.style.display = "block";
-}else{
-  if(loginLink) loginLink.textContent = "Uitloggen";
-  if(current.role!=="visitor") chatInput.disabled=false;
+function updateLoginBtn(){
+  const btn=document.getElementById("loginBtn");
+  if(!current){
+    btn.textContent="Inloggen";
+  }else{
+    btn.textContent="Uitloggen";
+  }
 }
+updateLoginBtn();
 
-<script>
-document.addEventListener("click", e => {
-  if(e.target.textContent === "Uitloggen"){
+document.addEventListener("click",e=>{
+  if(e.target.textContent==="Uitloggen"){
     localStorage.removeItem("current");
     location.reload();
   }
 });
+
+if(current && current.role!=="visitor"){
+  chatInput.disabled=false;
+}
 </script>
 
 </body>
 </html>
-
