@@ -113,6 +113,12 @@ color:var(--muted);
 margin-top:4px;
 }
 
+.mail{
+font-size:13px;
+color:#aaa;
+margin-top:4px;
+}
+
 .bio{
 margin-top:12px;
 font-size:14px;
@@ -241,8 +247,9 @@ border:none;
 <div id="editModal">
 <div id="editBox">
 <h3>Profiel bewerken</h3>
-<input id="editName">
-<textarea id="editContact" placeholder="Contact info / bio"></textarea>
+<input id="editName" placeholder="Naam">
+<input id="editMail" placeholder="Privé mail (koppeling account)">
+<textarea id="editContact" placeholder="Bio / contact info"></textarea>
 <select id="editRole">
 <option value="founder">Founder</option>
 <option value="leader">Leader</option>
@@ -256,34 +263,27 @@ border:none;
 </div>
 
 <script>
-let DEFAULT_AVATAR="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIg...";
-let users=[];
-let current=null;
-let feed=JSON.parse(localStorage.getItem("feed")||"[]");
+let users = JSON.parse(localStorage.getItem("users")||"[]");
+let current = JSON.parse(localStorage.getItem("current"));
+let feed = JSON.parse(localStorage.getItem("feed")||"[]");
 let editingId=null;
 
-/* FORCE 6 STANDAARD PROFIELEN */
-function initUsers(){
-let stored=JSON.parse(localStorage.getItem("users")||"[]");
-if(stored.length<6){
-users=[
-{id:crypto.randomUUID(),name:"Founder",email:"f@t.com",pass:"1234",role:"founder",avatar:DEFAULT_AVATAR,contact:"Eigenaar"},
-{id:crypto.randomUUID(),name:"Leader",email:"l@t.com",pass:"1234",role:"leader",avatar:DEFAULT_AVATAR,contact:"Co-owner"},
-{id:crypto.randomUUID(),name:"Member 1",email:"m1@t.com",pass:"1234",role:"member",avatar:DEFAULT_AVATAR,contact:""},
-{id:crypto.randomUUID(),name:"Member 2",email:"m2@t.com",pass:"1234",role:"member",avatar:DEFAULT_AVATAR,contact:""},
-{id:crypto.randomUUID(),name:"Visitor 1",email:"v1@t.com",pass:"1234",role:"visitor",avatar:DEFAULT_AVATAR,contact:""},
-{id:crypto.randomUUID(),name:"Visitor 2",email:"v2@t.com",pass:"1234",role:"visitor",avatar:DEFAULT_AVATAR,contact:""}
-];
+/* INIT STANDAARD PROFIELEN (alleen eerste keer) */
+if(users.length===0){
+for(let i=0;i<6;i++){
+users.push({
+id:crypto.randomUUID(),
+name:"Anoniem",
+mail:"",
+email:"",
+pass:"",
+role:"visitor",
+avatar:"",
+contact:""
+});
+}
 localStorage.setItem("users",JSON.stringify(users));
-}else{
-users=stored;
 }
-}
-initUsers();
-
-current=JSON.parse(localStorage.getItem("current"));
-
-function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
 
 /* MENU */
 menuBtn.onclick=()=>toggleMenu();
@@ -302,13 +302,26 @@ document.getElementById(id).classList.add("active");
 toggleMenu();
 }
 
-/* LOGIN */
+/* ACCOUNT */
+function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
+
 function register(){
 const name=regName.value.trim();
 const email=regEmail.value.trim();
 const pass=regPass.value;
 if(!name||!email||!pass)return alert("Vul alles in");
-users.push({id:crypto.randomUUID(),name,email,pass,role:"visitor",avatar:DEFAULT_AVATAR,contact:""});
+
+users.push({
+id:crypto.randomUUID(),
+name,
+mail:email,
+email,
+pass,
+role:"visitor",
+avatar:"",
+contact:""
+});
+
 saveUsers();
 alert("Account gemaakt");
 }
@@ -318,15 +331,19 @@ const id=loginIdentifier.value.trim();
 const pass=loginPass.value;
 const user=users.find(u=>(u.email===id||u.name===id)&&u.pass===pass);
 if(!user)return alert("Foute login");
+
 current=user;
 localStorage.setItem("current",JSON.stringify(current));
-updateChatAccess();
 updateLoginBtn();
+updateChatAccess();
 loadTeam();
 openPage("home");
 }
 
-function logout(){localStorage.removeItem("current");location.reload();}
+function logout(){
+localStorage.removeItem("current");
+location.reload();
+}
 
 function updateLoginBtn(){
 const btn=document.getElementById("loginBtn");
@@ -335,7 +352,7 @@ else{btn.textContent="Uitloggen";btn.onclick=logout;}
 }
 updateLoginBtn();
 
-/* CHAT */
+/* CHAT REALTIME */
 function updateChatAccess(){
 chatInput.disabled=!(current && ["member","leader","founder"].includes(current.role));
 }
@@ -358,6 +375,14 @@ renderChat();
 }
 });
 
+/* Sync tussen tabs */
+window.addEventListener("storage",e=>{
+if(e.key==="feed"){
+feed=JSON.parse(localStorage.getItem("feed"));
+renderChat();
+}
+});
+
 /* TEAM */
 function loadTeam(){
 teamGrid.innerHTML="";
@@ -365,15 +390,17 @@ users.forEach(u=>{
 let canEdit=false;
 if(current){
 if(["leader","founder"].includes(current.role))canEdit=true;
-if(current.role==="member" && current.id===u.id)canEdit=true;
+if(current.mail===u.mail)canEdit=true;
 }
+
 teamGrid.innerHTML+=`
 <div class="member">
 <div class="member-top">
-<div class="avatar" style="background-image:url('${u.avatar||DEFAULT_AVATAR}')"></div>
+<div class="avatar" style="background-image:url('${u.avatar||""}')"></div>
 <div class="member-info">
-<h4>${u.name}</h4>
+<h4>${u.name||"Anoniem"}</h4>
 <div class="role">${u.role}</div>
+<div class="mail">${u.mail? "Mail: "+u.mail:""}</div>
 </div>
 </div>
 <div class="bio">${u.contact||""}</div>
@@ -388,6 +415,7 @@ function openEdit(id){
 editingId=id;
 let u=users.find(x=>x.id===id);
 editName.value=u.name;
+editMail.value=u.mail;
 editContact.value=u.contact;
 editRole.value=u.role;
 editModal.style.display="flex";
@@ -398,18 +426,29 @@ function closeEdit(){editModal.style.display="none";}
 function saveProfile(){
 let u=users.find(x=>x.id===editingId);
 u.name=editName.value;
+u.mail=editMail.value;
 u.contact=editContact.value;
 u.role=editRole.value;
+
+let linkedAccount=users.find(x=>x.email===u.mail);
+if(linkedAccount){
+linkedAccount.role=u.role;
+}
+
 let file=editAvatar.files[0];
 if(file){
 let reader=new FileReader();
 reader.onload=e=>{
 u.avatar=e.target.result;
-saveUsers();loadTeam();closeEdit();
+saveUsers();
+loadTeam();
+closeEdit();
 };
 reader.readAsDataURL(file);
 }else{
-saveUsers();loadTeam();closeEdit();
+saveUsers();
+loadTeam();
+closeEdit();
 }
 }
 </script>
