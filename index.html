@@ -244,7 +244,6 @@ padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
 <h2>Inloggen</h2>
 <input id="loginIdentifier" placeholder="Naam of email">
 <input id="loginPass" type="password" placeholder="Wachtwoord">
-<button onclick="login()">Inloggen</button>
 <div id="loginMsg" class="error-msg"></div>
 
 <hr style="margin:20px 0;border:1px solid #222">
@@ -308,9 +307,26 @@ const chatInput = document.getElementById("chatInput");
 const chatFeed = document.getElementById("chatFeed");
 const chatPermissionMsg = document.getElementById("chatPermissionMsg");
 const teamGrid = document.getElementById("teamGrid");
+
 const authBtn = document.getElementById("authBtn");
 const regMsg = document.getElementById("regMsg");
 const loginMsg = document.getElementById("loginMsg");
+
+// Voeg deze toe:
+const regName = document.getElementById("regName");
+const regEmail = document.getElementById("regEmail");
+const regPass = document.getElementById("regPass");
+
+const loginIdentifier = document.getElementById("loginIdentifier");
+const loginPass = document.getElementById("loginPass");
+
+  authBtn.addEventListener("click", handleAuth);
+
+  const loginBtn = document.querySelector("#login button");
+loginBtn.addEventListener("click", login);
+
+
+
 
 // Menu en pagina's
 const menuBtn = document.getElementById("menuBtn");
@@ -346,20 +362,7 @@ document.querySelectorAll("#sidemenu a[data-page]").forEach(a=>{
   });
 });
 
-// 🔹 Auth button event - één keer
-authBtn.addEventListener("click", () => {
-  if(current){
-    // Uitloggen
-    current = null;
-    updatePermissions();
-    updateAuthButton();
-    loadTeam();
-    openPage("home");
-  } else {
-    // Open loginpagina
-    openPage("login");
-  }
-});
+
 
 // Variables
 let users = [];
