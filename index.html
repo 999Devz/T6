@@ -135,6 +135,19 @@ padding:6px;
 cursor:pointer;
 width:100%;
 }
+
+/* AUTH */
+.auth-box{
+max-width:420px;margin:40px auto;
+background:var(--card);padding:20px;border-radius:6px;
+}
+
+.auth-box input,.auth-box button{
+width:100%;padding:10px;margin-top:10px;
+background:#1e1e1e;color:white;border:none;
+}
+
+.auth-box button{background:var(--accent);cursor:pointer}
 </style>
 </head>
 
@@ -192,7 +205,7 @@ width:100%;
 </section>
 
 <section id="login">
-<div style="max-width:420px;margin:40px auto;background:#141414;padding:20px;border-radius:6px;">
+<div class="auth-box">
 <h2>Inloggen</h2>
 <input id="loginIdentifier" placeholder="Naam of email">
 <input id="loginPass" type="password" placeholder="Wachtwoord">
@@ -209,15 +222,28 @@ width:100%;
 </main>
 
 <script>
+const menuBtn = document.getElementById("menuBtn");
+const overlay = document.getElementById("overlay");
+
+menuBtn.onclick = toggleMenu;
+overlay.onclick = toggleMenu;
+
+function toggleMenu() {
+  const m = document.getElementById("sidemenu");
+  const o = document.getElementById("overlay");
+  if (m.style.left === "0px") { m.style.left="-260px"; o.style.display="none"; }
+  else { m.style.left="0px"; o.style.display="block"; }
+}
+
 let users = JSON.parse(localStorage.getItem("users")||"[]");
 let current = JSON.parse(localStorage.getItem("current"));
 let feed = JSON.parse(localStorage.getItem("feed")||"[]");
 
 const DEFAULT_AVATAR = "https://i.imgur.com/6VBx3io.png";
 
-/* Zorg dat er ALTIJD 6 standaard profielen zijn */
+/* Init 6 standaard profielen (behoudt bestaande users) */
 function ensureSixProfiles(){
-while(users.length < 6){
+while(users.length<6){
 users.push({
 id:crypto.randomUUID(),
 name:"Anoniem",
@@ -237,19 +263,17 @@ ensureSixProfiles();
 function openPage(id){
 document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
+toggleMenu();
 }
 
-/* ACCOUNT */
-function saveUsers(){
-localStorage.setItem("users",JSON.stringify(users));
-}
+/* ACCOUNT FUNCTIES */
+function saveUsers(){localStorage.setItem("users",JSON.stringify(users));}
 
 function register(){
 const name=regName.value.trim();
 const email=regEmail.value.trim();
 const pass=regPass.value;
 if(!name||!email||!pass)return alert("Vul alles in");
-
 users.push({
 id:crypto.randomUUID(),
 name,
@@ -260,7 +284,6 @@ role:"visitor",
 avatar:"",
 contact:""
 });
-
 saveUsers();
 alert("Account gemaakt");
 }
@@ -270,7 +293,6 @@ const id=loginIdentifier.value.trim();
 const pass=loginPass.value;
 const user=users.find(u=>(u.email===id||u.name===id)&&u.pass===pass);
 if(!user)return alert("Foute login");
-
 current=user;
 localStorage.setItem("current",JSON.stringify(current));
 updateChatAccess();
@@ -278,12 +300,12 @@ loadTeam();
 openPage("home");
 }
 
-/* CHAT */
 function updateChatAccess(){
 chatInput.disabled=!(current && ["member","leader","founder"].includes(current.role));
 }
 updateChatAccess();
 
+/* CHAT */
 function renderChat(){
 chatFeed.innerHTML="";
 feed.forEach(m=>{
@@ -308,10 +330,15 @@ renderChat();
 }
 });
 
-/* TEAM */
+/* TEAM GRID */
 function loadTeam(){
 teamGrid.innerHTML="";
 users.forEach(u=>{
+let canEdit=false;
+if(current){
+if(["leader","founder"].includes(current.role)) canEdit=true;
+if(current.mail && current.mail===u.mail) canEdit=true;
+}
 teamGrid.innerHTML+=`
 <div class="member">
 <div class="member-top">
@@ -323,10 +350,34 @@ teamGrid.innerHTML+=`
 </div>
 </div>
 <div class="bio">${u.contact||""}</div>
+${canEdit?`<button class="edit-btn" onclick='openEdit("${u.id}")'>Edit</button>`:""}
 </div>`;
 });
 }
 loadTeam();
+
+/* PROFIEL BEWERKEN MODAL */
+let editingId=null;
+
+function openEdit(id){
+editingId=id;
+let u=users.find(x=>x.id===id);
+let newName=prompt("Naam:", u.name);
+let newMail=prompt("Privé mail (koppelt account):", u.mail);
+let newBio=prompt("Bio / contact info:", u.contact);
+let newRole=prompt("Role (founder/leader/member/visitor):", u.role);
+if(newName) u.name=newName;
+if(newMail) u.mail=newMail;
+if(newBio) u.contact=newBio;
+if(newRole) {
+u.role=newRole;
+// update gekoppeld account
+let linked = users.find(x=>x.email===u.mail);
+if(linked) linked.role=newRole;
+}
+saveUsers();
+loadTeam();
+}
 </script>
 
 </body>
