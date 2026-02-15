@@ -177,7 +177,9 @@ section.active{display:block}
   <a onclick="openPage('contact')">Contact</a>
   <a onclick="openPage('donations')">Donaties</a>
   <a onclick="openPage('team')">Team</a>
+  <a onclick="openPage('auth')">Inloggen</a>
 </div>
+
 
 <main>
 
@@ -300,12 +302,26 @@ function loadTeam(){
 }
 loadTeam();
 
+const loginLink = [...document.querySelectorAll("#sidemenu a")]
+  .find(a => a.textContent === "Inloggen");
+
 if(!current){
   openPage("auth");
+  if(loginLink) loginLink.style.display = "block";
 }else{
+  if(loginLink) loginLink.textContent = "Uitloggen";
   if(current.role!=="visitor") chatInput.disabled=false;
 }
+
+<script>
+document.addEventListener("click", e => {
+  if(e.target.textContent === "Uitloggen"){
+    localStorage.removeItem("current");
+    location.reload();
+  }
+});
 </script>
 
 </body>
 </html>
+
