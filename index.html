@@ -192,13 +192,15 @@ padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
 <div id="overlay"></div>
 
 <div id="sidemenu">
-<a onclick="openPage('home')">Home</a>
-<a onclick="openPage('projects')">Projecten</a>
-<a onclick="openPage('team')">Team</a>
-<a onclick="openPage('contact')">Contact</a>
-<a onclick="openPage('donations')">Donaties</a>
-<a id="authBtn" onclick="handleAuth()">Inloggen</a>
+  <a data-page="home">Home</a>
+  <a data-page="projects">Projecten</a>
+  <a data-page="team">Team</a>
+  <a data-page="contact">Contact</a>
+  <a data-page="donations">Donaties</a>
+  <a id="authBtn">Inloggen</a>
 </div>
+authBtn.addEventListener("click", handleAuth);
+
 
 <main>
 
@@ -311,6 +313,8 @@ const teamGrid = document.getElementById("teamGrid");
 const authBtn = document.getElementById("authBtn");
 const regMsg = document.getElementById("regMsg");
 const loginMsg = document.getElementById("loginMsg");
+  authBtn.addEventListener("click", handleAuth);
+
 
 // Menu en pagina's
 const menuBtn = document.getElementById("menuBtn");
@@ -337,14 +341,16 @@ function openPage(id){
   document.getElementById("homeHeader").classList.toggle("active",id==="home");
   closeMenu();
 }
-
-// Zorg dat alle <a> tags in sidemenu clicks correct handelen
-document.querySelectorAll("#sidemenu a").forEach(a=>{
+  // Zorg dat alle <a> tags met data-page clicks correct handelen
+document.querySelectorAll("#sidemenu a[data-page]").forEach(a=>{
   a.addEventListener("click", e=>{
-    const page = a.getAttribute("onclick")?.match(/openPage\('(\w+)'\)/)?.[1];
+    const page = a.dataset.page;
     if(page) openPage(page);
   });
 });
+
+
+
 
 
 // Variables
@@ -510,39 +516,8 @@ function saveEdit(){
   saveUsers(); loadTeam(); closeModal();
 }
 
-// Menu en pagina's
-const menuBtn = document.getElementById("menuBtn");
-const overlay = document.getElementById("overlay");
-const sideMenu = document.getElementById("sidemenu");
 
-menuBtn.addEventListener("click", () => {
-  sideMenu.style.left = "0px";
-  overlay.style.display = "block";
-});
 
-overlay.addEventListener("click", closeMenu);
-
-function closeMenu() {
-  sideMenu.style.left = "-260px";
-  overlay.style.display = "none";
-}
-
-// Open page
-function openPage(id){
-  document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
-  const el=document.getElementById(id);
-  if(el) el.classList.add("active");
-  document.getElementById("homeHeader").classList.toggle("active",id==="home");
-  closeMenu();
-}
-
-// Zorg dat alle <a> tags in sidemenu clicks correct handelen
-document.querySelectorAll("#sidemenu a").forEach(a=>{
-  a.addEventListener("click", e=>{
-    const page = a.getAttribute("onclick")?.match(/openPage\('(\w+)'\)/)?.[1];
-    if(page) openPage(page);
-  });
-});
 
 // Start
 init();
