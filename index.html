@@ -416,30 +416,72 @@ function updateAuthButton(){ authBtn.innerText=current?"Uitloggen":"Inloggen"; }
 
 // Register
 function register(){
-  regMsg.innerHTML="";
-  const name=regName.value.trim();
-  const email=regEmail.value.trim();
-  const pass=regPass.value.trim();
-  if(!name||!email||!pass){ regMsg.innerHTML="<div class='error-msg'>Vul alle velden in.</div>"; return; }
-  if(users.find(u=>u.email===email)){ regMsg.innerHTML="<div class='error-msg'>Email bestaat al.</div>"; return; }
-  users.push({id:crypto.randomUUID(), name, email, mail:email, pass, role:"visitor", avatar:"", bio:"", contact:""});
-  saveUsers(); regMsg.innerHTML="<div class='success-msg'>Account aangemaakt.</div>";
+  regMsg.innerHTML=""; // reset melding
+  const name = regName.value.trim();
+  const email = regEmail.value.trim();
+  const pass = regPass.value.trim();
+
+  if(!name || !email || !pass){
+    regMsg.innerHTML = "<div class='error-msg'>Vul alle velden in.</div>";
+    return;
+  }
+
+  if(users.find(u => u.email === email)){
+    regMsg.innerHTML = "<div class='error-msg'>Email bestaat al.</div>";
+    return;
+  }
+
+  users.push({
+    id: crypto.randomUUID(),
+    name,
+    email,
+    mail: email,
+    pass,
+    role: "visitor",
+    avatar: "",
+    bio: "",
+    contact: ""
+  });
+
+  saveUsers(); 
+  regMsg.innerHTML = "<div class='success-msg'>Account succesvol aangemaakt!</div>";
+
+  // Optioneel: velden leegmaken
+  regName.value = "";
+  regEmail.value = "";
+  regPass.value = "";
 }
+
 
 // Login
 function login(){
-  loginMsg.innerHTML="";
-  const id=loginIdentifier.value.trim();
-  const pass=loginPass.value.trim();
-  if(!id||!pass){ loginMsg.innerText="Vul alle velden in."; return; }
-  const user=users.find(u=>u.email===id||u.name===id);
-  if(!user){ loginMsg.innerText="Account niet gevonden."; return; }
-  if(user.pass!==pass){ loginMsg.innerText="Wachtwoord klopt niet."; return; }
-  current=user; 
+  loginMsg.innerHTML=""; // reset foutmelding
+  const id = loginIdentifier.value.trim();
+  const pass = loginPass.value.trim();
+
+  if(!id || !pass){
+    loginMsg.innerText = "Vul alle velden in."; 
+    return;
+  }
+
+  const user = users.find(u => u.email === id || u.name === id);
+  if(!user){
+    loginMsg.innerText = "Account niet gevonden."; 
+    return;
+  }
+
+  if(user.pass !== pass){
+    loginMsg.innerText = "Wachtwoord klopt niet."; 
+    return;
+  }
+
+  // login succesvol
+  current = user; 
   updatePermissions(); 
   updateAuthButton(); 
   loadTeam(); 
   openPage("home");
+  loginMsg.innerText = ""; // foutmelding weg na succes
 }
 
 // Permissions
