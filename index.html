@@ -312,16 +312,40 @@ const authBtn = document.getElementById("authBtn");
 const regMsg = document.getElementById("regMsg");
 const loginMsg = document.getElementById("loginMsg");
 
-// Menu
+// Menu en pagina's
 const menuBtn = document.getElementById("menuBtn");
 const overlay = document.getElementById("overlay");
-menuBtn.addEventListener("click", toggleMenu);
-overlay.addEventListener("click", toggleMenu);
-function toggleMenu(){
-  const m = document.getElementById("sidemenu");
-  if(m.style.left==="0px"){ m.style.left="-260px"; overlay.style.display="none"; }
-  else { m.style.left="0px"; overlay.style.display="block"; }
+const sideMenu = document.getElementById("sidemenu");
+
+menuBtn.addEventListener("click", () => {
+  sideMenu.style.left = "0px";
+  overlay.style.display = "block";
+});
+
+overlay.addEventListener("click", closeMenu);
+
+function closeMenu() {
+  sideMenu.style.left = "-260px";
+  overlay.style.display = "none";
 }
+
+// Open page
+function openPage(id){
+  document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
+  const el=document.getElementById(id);
+  if(el) el.classList.add("active");
+  document.getElementById("homeHeader").classList.toggle("active",id==="home");
+  closeMenu();
+}
+
+// Zorg dat alle <a> tags in sidemenu clicks correct handelen
+document.querySelectorAll("#sidemenu a").forEach(a=>{
+  a.addEventListener("click", e=>{
+    const page = a.getAttribute("onclick")?.match(/openPage\('(\w+)'\)/)?.[1];
+    if(page) openPage(page);
+  });
+});
+
 
 // Variables
 let users = [];
