@@ -220,10 +220,12 @@ section.active{display:block}
     </div>
   </section>
 
-  <section id="team">
-    <h2>Team</h2>
-    <div class="team-grid" id="teamGrid"></div>
-  </section>
+<section id="team">
+  <h2>Team</h2>
+  <div id="addMemberContainer" style="margin-bottom:16px;"></div>
+  <div class="team-grid" id="teamGrid"></div>
+</section>
+
 
   <section id="contact">
     <h2>Contact</h2>
@@ -494,6 +496,9 @@ function loadTeam(){
         ${canEdit?`<button class="edit-btn" onclick='openEdit("${u.id}")'>Edit</button>`:""}
       </div>`;
   });
+
+  // Toon knop "Nieuw Profiel" voor leaders/founders
+  renderAddMemberButton();
 }
 
 let editingId=null;
@@ -536,6 +541,42 @@ window.saveEdit=function(){
   u.role = document.getElementById("modalRole").value;
   saveUsers(); loadTeam(); closeModal();
 }
+
+ 
+
+  function renderAddMemberButton(){
+  const container = document.getElementById("addMemberContainer");
+  container.innerHTML = "";
+  if(current && ["leader","founder"].includes(current.role)){
+    const btn = document.createElement("button");
+    btn.innerText = "Nieuw Profiel";
+    btn.style.background = "var(--accent)";
+    btn.style.color = "white";
+    btn.style.border = "none";
+    btn.style.padding = "8px 12px";
+    btn.style.cursor = "pointer";
+    btn.addEventListener("click", ()=>{
+      const newUser = {
+        id: crypto.randomUUID(),
+        name: "Nieuw Lid",
+        email: "",
+        mail: "",
+        pass: "",
+        role: "visitor",
+        avatar: "",
+        bio: "",
+        contact: ""
+      };
+      users.push(newUser);
+      saveUsers();
+      loadTeam();
+      openEdit(newUser.id);
+    });
+    container.appendChild(btn);
+  }
+}
+
+
 
 async function init(){
   setupNavigation();
