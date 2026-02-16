@@ -258,7 +258,6 @@ section.active{display:block}
     </div>
   </section>
 
-  <!-- MODAL -->
   <div class="modal" id="editModal">
     <div class="modal-content">
       <h3>Profiel Bewerken</h3>
@@ -278,13 +277,10 @@ section.active{display:block}
   </div>
 
 </main>
-
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCOi0LZ1aHbb2wJuVkGfGZL1FGzXkY49FA",
   authDomain: "tahiri-d0f8e.firebaseapp.com",
@@ -299,7 +295,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// DOM elements
 const chatInput = document.getElementById("chatInput");
 const chatFeed = document.getElementById("chatFeed");
 const chatPermissionMsg = document.getElementById("chatPermissionMsg");
@@ -322,17 +317,14 @@ const menuBtn = document.getElementById("menuBtn");
 const overlay = document.getElementById("overlay");
 const sideMenu = document.getElementById("sidemenu");
 
-// Data refs
 const usersRef = ref(db,'users');
 const feedRef = ref(db,'chatFeed');
 
-// State
 let users = [];
 let current = null;
 let feed = [];
 const DEFAULT_AVATAR="https://i.imgur.com/6VBx3io.png";
 
-// Helper: open/close menu
 function openMenu(){
   sideMenu.style.left = "0px";
   overlay.style.display = "block";
@@ -342,7 +334,6 @@ function closeMenu(){
   overlay.style.display = "none";
 }
 
-// Helper: open page
 function openPage(id){
   document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
   const el=document.getElementById(id);
@@ -351,8 +342,18 @@ function openPage(id){
   closeMenu();
 }
 
-// Auth helpers
+/* FIX: navigation binding */
+function setupNavigation(){
+  document.querySelectorAll("#sidemenu a[data-page]").forEach(link=>{
+    link.addEventListener("click", ()=>{
+      const page = link.getAttribute("data-page");
+      openPage(page);
+    });
+  });
+}
+
 function updateAuthButton(){ authBtn.innerText=current?"Uitloggen":"Inloggen"; }
+
 function updatePermissions(){
   if(!current||!["member","leader","founder"].includes(current.role)){
     chatInput.disabled=true;
@@ -362,6 +363,7 @@ function updatePermissions(){
     chatPermissionMsg.innerText="";
   }
 }
+
 function handleAuth(){
   if(current){
     current = null;
@@ -374,7 +376,6 @@ function handleAuth(){
   }
 }
 
-// Register
 function register(){
   regMsg.innerHTML="";
   const name = regName.value.trim();
@@ -401,12 +402,12 @@ function register(){
     bio: "",
     contact: ""
   });
+
   saveUsers();
   regMsg.innerHTML = "<div class='success-msg'>Account succesvol aangemaakt!</div>";
   regName.value=""; regEmail.value=""; regPass.value="";
 }
 
-// Login
 function login(){
   loginMsg.innerHTML="";
   const id = loginIdentifier.value.trim();
@@ -415,6 +416,7 @@ function login(){
   if(!id || !pass){
     loginMsg.innerText="Vul alle velden in."; return;
   }
+
   const user = users.find(u => u.email===id || u.name===id);
   if(!user){
     loginMsg.innerText="Account niet gevonden."; return;
@@ -431,13 +433,13 @@ function login(){
   loginMsg.innerText="";
 }
 
-// Chat
 function renderChat(){
   chatFeed.innerHTML="";
   feed.sort((a,b)=>a.timestamp-b.timestamp).forEach(m=>{
     chatFeed.innerHTML += `<div class="msg"><b>${m.name}</b>: ${m.text}</div>`;
   });
 }
+
 chatInput.addEventListener("keypress", e=>{
   if(e.key==="Enter"){
     if(chatInput.disabled||!current) return;
@@ -448,7 +450,6 @@ chatInput.addEventListener("keypress", e=>{
   }
 });
 
-// Users + team
 function ensureSixProfiles(){
   while(users.length<6){
     users.push({
@@ -465,11 +466,13 @@ function ensureSixProfiles(){
   }
   saveUsers();
 }
+
 function saveUsers(){
   const obj={};
   users.forEach(u=>obj[u.id]=u);
   set(usersRef,obj);
 }
+
 function loadTeam(){
   teamGrid.innerHTML="";
   users.slice(0,6).forEach(u=>{
@@ -493,9 +496,9 @@ function loadTeam(){
   });
 }
 
-// Modal
 let editingId=null;
-function openEdit(id){
+
+window.openEdit=function(id){
   editingId=id;
   const u=users.find(x=>x.id===id);
   if(!u) return;
@@ -505,10 +508,12 @@ function openEdit(id){
   document.getElementById("modalRole").value=u.role;
   document.getElementById("editModal").style.display="flex";
 }
-function closeModal(){
+
+window.closeModal=function(){
   editingId=null;
   document.getElementById("editModal").style.display="none";
 }
+
 document.getElementById("modalAvatar").addEventListener("change", e=>{
   const file=e.target.files[0]; if(!file) return;
   const reader=new FileReader();
@@ -520,7 +525,8 @@ document.getElementById("modalAvatar").addEventListener("change", e=>{
   };
   reader.readAsDataURL(file);
 });
-function saveEdit(){
+
+window.saveEdit=function(){
   const u=users.find(x=>x.id===editingId);
   if(!u) return;
   u.name = document.getElementById("modalName").value;
@@ -531,8 +537,9 @@ function saveEdit(){
   saveUsers(); loadTeam(); closeModal();
 }
 
-// Init
 async function init(){
+  setupNavigation();
+
   const snapUsers = await get(usersRef);
   if(snapUsers.exists()) users=Object.values(snapUsers.val());
   ensureSixProfiles();
@@ -550,15 +557,12 @@ async function init(){
   openPage("home");
 }
 
-// Event listeners
 menuBtn.addEventListener("click", openMenu);
 overlay.addEventListener("click", closeMenu);
 authBtn.addEventListener("click", handleAuth);
 loginBtn.addEventListener("click", login);
 regBtn.addEventListener("click", register);
 
-// Hook DOMContentLoaded to ensure DOM is ready before JS runs;
-// ensures listeners attach correctly; mdn notes this event fires when DOM is parsed. :contentReference[oaicite:0]{index=0}
 document.addEventListener("DOMContentLoaded", ()=>{
   init();
 });
