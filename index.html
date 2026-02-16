@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tahiri</title>
 
 <style>
@@ -18,171 +18,64 @@
 *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
 body{margin:0;background:var(--bg);color:var(--text);}
 
+/* HEADER & MENU */
 header{
   position:fixed;top:0;left:0;width:100%;height:60px;
   display:flex;align-items:center;padding:0 16px;z-index:100;
 }
-
 .menu-btn{font-size:26px;cursor:pointer;}
-
-#overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;
-}
-
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;}
 #sidemenu{
   position:fixed;top:0;left:-260px;width:260px;height:100%;
   background:#0f0f0f;padding:20px;transition:.3s;z-index:100;
 }
-
 #sidemenu a{
   display:block;padding:12px 0;color:var(--text);
   text-decoration:none;cursor:pointer;
 }
+#sidemenu a:hover{color:var(--accent);}
 
-#sidemenu a:hover{color:var(--accent)}
-
-main{
-  padding-top:80px;
-  max-width:1100px;
-  margin:auto;
-  padding-left:16px;
-  padding-right:16px;
-}
-
+/* MAIN SECTIONS */
+main{padding-top:80px;max-width:1100px;margin:auto;padding-left:16px;padding-right:16px;}
 section{display:none}
 section.active{display:block}
-
-#homeHeader{
-  display:none;
-  text-align:center;
-  margin-top:120px;
-}
+#homeHeader{text-align:center;margin-top:120px;display:none;}
 #homeHeader.active{display:block}
 
-/* CHAT */
+/* CHAT STYLES */
 .chat-box{background:var(--card);padding:12px;border-radius:6px;}
 .chat-feed{max-height:350px;overflow:auto;margin-bottom:10px;}
 .msg{padding:6px 0;border-bottom:1px solid #222;}
 .chat-input input{
-  width:100%;
-  padding:10px;
-  background:#1e1e1e;
-  border:none;
-  color:white;
+  width:100%;padding:10px;background:#1e1e1e;border:none;color:white;
 }
-.permission-msg{
-  margin-top:8px;
-  font-size:13px;
-  color:var(--error);
-}
+.permission-msg{margin-top:8px;font-size:13px;color:var(--error);}
 
-/* TEAM */
-.team-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-  gap:16px;
-}
-
-.member{
-  background:var(--card);
-  padding:16px;
-  border-radius:8px;
-}
-
-.member-top{
-  display:flex;
-  gap:15px;
-  align-items:flex-start;
-}
-
-.avatar{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  background:#333;
-  background-size:cover;
-  background-position:center;
-  flex-shrink:0;
-  cursor:pointer;
-}
-
-.member-info h4{
-  margin:0;
-  font-size:18px;
-}
-
-.role{
-  font-size:14px;
-  color:var(--muted);
-  margin-top:4px;
-}
-
-.bio{
-  margin-top:12px;
-  font-size:14px;
-  color:#ccc;
-  white-space:pre-line;
-}
-
-.contact{
-  margin-top:8px;
-  font-size:13px;
-  color:#aaa;
-}
-
-.edit-btn{
-  margin-top:12px;
-  background:var(--accent);
-  border:none;
-  color:white;
-  padding:6px;
-  cursor:pointer;
-  width:100%;
-}
+/* TEAM STYLES */
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+.member{background:var(--card);padding:16px;border-radius:8px;}
+.member-top{display:flex;gap:15px;align-items:flex-start;}
+.avatar{width:90px;height:90px;border-radius:50%;background:#333;background-size:cover;background-position:center;flex-shrink:0;cursor:pointer;}
+.member-info h4{margin:0;font-size:18px;}
+.role{font-size:14px;color:var(--muted);margin-top:4px;}
+.bio{margin-top:12px;font-size:14px;color:#ccc;white-space:pre-line;}
+.contact{margin-top:8px;font-size:13px;color:#aaa;}
+.edit-btn{margin-top:12px;background:var(--accent);border:none;color:white;padding:6px;cursor:pointer;width:100%;}
 
 /* AUTH */
-.auth-box{
-  max-width:420px;margin:40px auto;
-  background:var(--card);padding:20px;border-radius:6px;
-}
-
-.auth-box input,.auth-box button{
-  width:100%;padding:10px;margin-top:10px;
-  background:#1e1e1e;color:white;border:none;
-}
-
-.auth-box button{background:var(--accent);cursor:pointer}
-
-.error-msg{
-  margin-top:10px;
-  color:var(--error);
-  font-size:13px;
-}
-.success-msg{
-  margin-top:10px;
-  color:#4dff88;
-  font-size:13px;
-}
+.auth-box{max-width:420px;margin:40px auto;background:var(--card);padding:20px;border-radius:6px;}
+.auth-box input,.auth-box button{width:100%;padding:10px;margin-top:10px;background:#1e1e1e;color:white;border:none;}
+.auth-box button{background:var(--accent);cursor:pointer;}
+.error-msg{margin-top:10px;color:var(--error);font-size:13px;}
+.success-msg{margin-top:10px;color:#4dff88;font-size:13px;}
 
 /* MODAL */
-.modal{
-  position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);
-  display:none;align-items:center;justify-content:center;z-index:200;
-}
-.modal-content{
-  background:var(--card);padding:20px;border-radius:8px;width:350px;
-  display:flex;flex-direction:column;gap:10px;
-}
-.modal-content input, .modal-content select{
-  padding:8px;
-  background:#1e1e1e;color:white;border:none;width:100%;
-}
-.modal-content button{
-  padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;
-}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-content{background:var(--card);padding:20px;border-radius:8px;width:350px;display:flex;flex-direction:column;gap:10px;}
+.modal-content input, .modal-content select{padding:8px;background:#1e1e1e;color:white;border:none;width:100%;}
+.modal-content button{padding:8px;background:var(--accent);color:white;border:none;cursor:pointer;}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -190,7 +83,6 @@ section.active{display:block}
 </header>
 
 <div id="overlay"></div>
-
 <div id="sidemenu">
   <a data-page="home">Home</a>
   <a data-page="projects">Projecten</a>
@@ -201,7 +93,6 @@ section.active{display:block}
 </div>
 
 <main>
-
   <div id="homeHeader">
     <h1>TAHIRI</h1>
     <p>De Tahiri Site</p>
@@ -213,9 +104,7 @@ section.active{display:block}
     <h2>Projecten – Live Chat</h2>
     <div class="chat-box">
       <div class="chat-feed" id="chatFeed"></div>
-      <div class="chat-input">
-        <input id="chatInput" placeholder="Typ bericht...">
-      </div>
+      <div class="chat-input"><input id="chatInput" placeholder="Typ bericht..."></div>
       <div id="chatPermissionMsg" class="permission-msg"></div>
     </div>
   </section>
@@ -225,6 +114,7 @@ section.active{display:block}
     <div id="addMemberContainer" style="margin-bottom:16px;"></div>
     <div class="team-grid" id="teamGrid"></div>
   </section>
+
   <section id="contact">
     <h2>Contact</h2>
     <p>Mail: TahiriBusiness@gmail.com</p>
@@ -276,13 +166,11 @@ section.active{display:block}
       <button onclick="closeModal()">Annuleren</button>
     </div>
   </div>
-
-</main>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
+// --- FIREBASE CONFIG ---
 const firebaseConfig = {
   apiKey: "AIzaSyCOi0LZ1aHbb2wJuVkGfGZL1FGzXkY49FA",
   authDomain: "tahiri-d0f8e.firebaseapp.com",
@@ -297,7 +185,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// DOM ELEMENTS
+// --- DOM ELEMENTS ---
 const chatInput = document.getElementById("chatInput");
 const chatFeed = document.getElementById("chatFeed");
 const chatPermissionMsg = document.getElementById("chatPermissionMsg");
@@ -305,7 +193,6 @@ const teamGrid = document.getElementById("teamGrid");
 const authBtn = document.getElementById("authBtn");
 const regMsg = document.getElementById("regMsg");
 const loginMsg = document.getElementById("loginMsg");
-
 const regName = document.getElementById("regName");
 const regEmail = document.getElementById("regEmail");
 const regPass = document.getElementById("regPass");
@@ -313,39 +200,38 @@ const loginIdentifier = document.getElementById("loginIdentifier");
 const loginPass = document.getElementById("loginPass");
 const loginBtn = document.getElementById("loginBtn");
 const regBtn = document.getElementById("regBtn");
-
 const menuBtn = document.getElementById("menuBtn");
 const overlay = document.getElementById("overlay");
 const sideMenu = document.getElementById("sidemenu");
 
-// DATABASE REFERENCES
+// --- DATABASE REFERENCES ---
 const usersRef = ref(db,'users');
 const feedRef = ref(db,'chatFeed');
-const privateFeedRef = ref(db,'privateFeed'); // <-- voor private members chat
+const privateFeedRef = ref(db,'privateFeed'); // Members-only chat
 
-// VARIABLES
+// --- VARIABLES ---
 let users = [];
-let current = null;
 let feed = [];
-const DEFAULT_AVATAR="https://i.imgur.com/6VBx3io.png";
+let privateFeed = [];
+let current = null;
+const DEFAULT_AVATAR = "https://i.imgur.com/6VBx3io.png";
 
 // --- ROLES & PERMISSIONS ---
 const rolesPermissions = {
   visitor: {chatSend:false, chatEditOwn:false, chatEditAll:false},
   member: {chatSend:true, chatEditOwn:true, chatEditAll:false},
-  staff: {chatSend:true, chatEditOwn:true, chatEditAll:true}, // staff kan berichten van iedereen verwijderen/bewerken
+  staff: {chatSend:true, chatEditOwn:true, chatEditAll:true}, // Staff kan berichten bewerken/verwijderen
   leader: {chatSend:true, chatEditOwn:true, chatEditAll:true},
   founder: {chatSend:true, chatEditOwn:true, chatEditAll:true}
 };
 
 // --- MENU FUNCTIONS ---
-function openMenu(){ sideMenu.style.left = "0px"; overlay.style.display = "block"; }
-function closeMenu(){ sideMenu.style.left = "-260px"; overlay.style.display = "none"; }
+function openMenu(){ sideMenu.style.left="0px"; overlay.style.display="block"; }
+function closeMenu(){ sideMenu.style.left="-260px"; overlay.style.display="none"; }
 function setupNavigation(){
   document.querySelectorAll("#sidemenu a[data-page]").forEach(link=>{
     link.addEventListener("click", ()=>{
-      const page = link.getAttribute("data-page");
-      openPage(page);
+      openPage(link.getAttribute("data-page"));
     });
   });
 }
@@ -356,6 +242,7 @@ function openPage(id){
   document.getElementById("homeHeader").classList.toggle("active", id==="home");
   closeMenu();
 }
+
 // --- AUTH FUNCTIONS ---
 function updateAuthButton(){ authBtn.innerText = current ? "Uitloggen" : "Inloggen"; }
 
@@ -387,19 +274,11 @@ function register(){
   const name = regName.value.trim();
   const email = regEmail.value.trim();
   const pass = regPass.value.trim();
-  if(!name || !email || !pass){
-    regMsg.innerHTML="<div class='error-msg'>Vul alle velden in.</div>";
-    return;
-  }
-  if(users.find(u => u.email === email)){
-    regMsg.innerHTML="<div class='error-msg'>Email bestaat al.</div>";
-    return;
-  }
-  users.push({
-    id: crypto.randomUUID(),
-    name, email, mail: email, pass,
-    role: "visitor", avatar:"", bio:"", contact:""
-  });
+  if(!name || !email || !pass){ regMsg.innerHTML="<div class='error-msg'>Vul alle velden in.</div>"; return; }
+  if(users.find(u=>u.email===email)){ regMsg.innerHTML="<div class='error-msg'>Email bestaat al.</div>"; return; }
+
+  const newUser = { id:crypto.randomUUID(), name, email, mail:email, pass, role:"visitor", avatar:"", bio:"", contact:"" };
+  users.push(newUser);
   saveUsers();
   regMsg.innerHTML="<div class='success-msg'>Account succesvol aangemaakt!</div>";
   regName.value=""; regEmail.value=""; regPass.value="";
@@ -410,8 +289,7 @@ function login(){
   const id = loginIdentifier.value.trim();
   const pass = loginPass.value.trim();
   if(!id || !pass){ loginMsg.innerText="Vul alle velden in."; return; }
-
-  const user = users.find(u => u.email===id || u.name===id);
+  const user = users.find(u=>u.email===id || u.name===id);
   if(!user){ loginMsg.innerText="Account niet gevonden."; return; }
   if(user.pass!==pass){ loginMsg.innerText="Wachtwoord klopt niet."; return; }
 
@@ -423,7 +301,7 @@ function login(){
   openPage("home");
 }
 
-// --- CHAT FUNCTIONS ---
+// --- LIVE CHAT ---
 chatInput.addEventListener("keypress", e=>{
   if(e.key==="Enter"){
     if(chatInput.disabled || !current) return;
@@ -434,11 +312,10 @@ chatInput.addEventListener("keypress", e=>{
   }
 });
 
-// --- RENDER CHAT WITH EDIT/DELETE ---
 function renderChat(){
   chatFeed.innerHTML="";
   feed.sort((a,b)=>a.timestamp-b.timestamp).forEach(m=>{
-    let canEdit = current && (m.email===current.email && rolesPermissions[current.role].chatEditOwn) || rolesPermissions[current.role].chatEditAll;
+    const canEdit = current && ((m.email===current.email && rolesPermissions[current.role].chatEditOwn) || rolesPermissions[current.role].chatEditAll);
     chatFeed.innerHTML += `<div class="msg" id="msg-${m.id}">
       <b>${m.name}</b>: <span class="msg-text">${m.text}</span>
       ${canEdit?`<button onclick='editMsg("${m.id}")'>✏️</button> <button onclick='deleteMsg("${m.id}")'>🗑️</button>`:""}
@@ -446,30 +323,26 @@ function renderChat(){
   });
 }
 
-// --- MESSAGE EDIT / DELETE ---
 window.editMsg = function(id){
   const m = feed.find(x=>x.id===id);
-  if(!m) return;
-  if(!current || (!(m.email===current.email && rolesPermissions[current.role].chatEditOwn) && !rolesPermissions[current.role].chatEditAll)) return;
+  if(!m || !current) return;
+  if(!( (m.email===current.email && rolesPermissions[current.role].chatEditOwn) || rolesPermissions[current.role].chatEditAll )) return;
   const newText = prompt("Bewerk bericht:", m.text);
-  if(newText!==null){
-    m.text = newText;
-    set(ref(db,'chatFeed/'+id), m);
-  }
+  if(newText!==null){ m.text=newText; set(ref(db,'chatFeed/'+id), m); }
 }
 
 window.deleteMsg = function(id){
   const m = feed.find(x=>x.id===id);
-  if(!m) return;
-  if(!current || (!(m.email===current.email && rolesPermissions[current.role].chatEditOwn) && !rolesPermissions[current.role].chatEditAll)) return;
+  if(!m || !current) return;
+  if(!( (m.email===current.email && rolesPermissions[current.role].chatEditOwn) || rolesPermissions[current.role].chatEditAll )) return;
   set(ref(db,'chatFeed/'+id), null);
 }
 
 // --- PRIVATE MEMBERS-ONLY CHAT ---
 const privateChatInput = document.createElement("input");
 privateChatInput.placeholder = "Private members chat...";
-privateChatInput.style.width = "100%";
-privateChatInput.style.marginTop = "10px";
+privateChatInput.style.width="100%";
+privateChatInput.style.marginTop="10px";
 
 const privateChatFeed = document.createElement("div");
 privateChatFeed.style.maxHeight="200px";
@@ -492,7 +365,7 @@ privateChatInput.addEventListener("keypress", e=>{
 function renderPrivateChat(msgs){
   privateChatFeed.innerHTML="";
   msgs.sort((a,b)=>a.timestamp-b.timestamp).forEach(m=>{
-    let canEdit = current && (m.email===current.email && rolesPermissions[current.role].chatEditOwn) || rolesPermissions[current.role].chatEditAll;
+    const canEdit = current && ((m.email===current.email && rolesPermissions[current.role].chatEditOwn) || rolesPermissions[current.role].chatEditAll);
     privateChatFeed.innerHTML += `<div class="msg" id="pmsg-${m.id}">
       <b>${m.name}</b>: <span class="msg-text">${m.text}</span>
       ${canEdit?`<button onclick='editPrivateMsg("${m.id}")'>✏️</button> <button onclick='deletePrivateMsg("${m.id}")'>🗑️</button>`:""}
@@ -502,19 +375,16 @@ function renderPrivateChat(msgs){
 
 window.editPrivateMsg = function(id){
   const m = privateFeed.find(x=>x.id===id);
-  if(!m) return;
-  if(!current || (!(m.email===current.email && rolesPermissions[current.role].chatEditOwn) && !rolesPermissions[current.role].chatEditAll)) return;
+  if(!m || !current) return;
+  if(!( (m.email===current.email && rolesPermissions[current.role].chatEditOwn) || rolesPermissions[current.role].chatEditAll )) return;
   const newText = prompt("Bewerk bericht:", m.text);
-  if(newText!==null){
-    m.text = newText;
-    set(ref(db,'privateFeed/'+id), m);
-  }
+  if(newText!==null){ m.text=newText; set(ref(db,'privateFeed/'+id), m); }
 }
 
 window.deletePrivateMsg = function(id){
   const m = privateFeed.find(x=>x.id===id);
-  if(!m) return;
-  if(!current || (!(m.email===current.email && rolesPermissions[current.role].chatEditOwn) && !rolesPermissions[current.role].chatEditAll)) return;
+  if(!m || !current) return;
+  if(!( (m.email===current.email && rolesPermissions[current.role].chatEditOwn) || rolesPermissions[current.role].chatEditAll )) return;
   set(ref(db,'privateFeed/'+id), null);
 }
 // --- TEAM / PROFIELSYSTEEM ---
@@ -614,14 +484,21 @@ function renderAddMemberButton(){
   }
 }
 
-// --- INIT & LISTENERS ---
+// --- SAVE USERS TO FIREBASE ---
+function saveUsers(){
+  const obj = {};
+  users.forEach(u=>obj[u.id]=u);
+  set(usersRef, obj);
+}
+
+// --- INIT FUNCTION ---
 async function init(){
   setupNavigation();
 
   const snapUsers = await get(usersRef);
   if(snapUsers.exists()) users = Object.values(snapUsers.val());
 
-  // --- Login persist ---
+  // Login persist
   const storedEmail = localStorage.getItem("currentUserEmail");
   if(storedEmail) current = users.find(u=>u.email===storedEmail) || null;
 
@@ -631,15 +508,14 @@ async function init(){
   if(snapFeed.exists()) feed = Object.values(snapFeed.val());
   renderChat();
 
-  // Private feed
-  const snapPrivate = await get(ref(db,'privateFeed'));
+  const snapPrivate = await get(privateFeedRef);
   if(snapPrivate.exists()) privateFeed = Object.values(snapPrivate.val());
   renderPrivateChat(privateFeed);
 
   // Real-time listeners
-  onValue(feedRef, snap=>{ if(snap.exists()){ feed = Object.values(snap.val()); renderChat(); }});
-  onValue(ref(db,'privateFeed'), snap=>{ if(snap.exists()){ privateFeed = Object.values(snap.val()); renderPrivateChat(privateFeed); }});
-  onValue(usersRef, snap=>{ if(snap.exists()){ users = Object.values(snap.val()); loadTeam(); }});
+  onValue(feedRef, snap=>{ if(snap.exists()){ feed=Object.values(snap.val()); renderChat(); }});
+  onValue(privateFeedRef, snap=>{ if(snap.exists()){ privateFeed=Object.values(snap.val()); renderPrivateChat(privateFeed); }});
+  onValue(usersRef, snap=>{ if(snap.exists()){ users=Object.values(snap.val()); loadTeam(); }});
 
   updatePermissions();
   updateAuthButton();
@@ -654,3 +530,4 @@ loginBtn.addEventListener("click", login);
 regBtn.addEventListener("click", register);
 
 document.addEventListener("DOMContentLoaded", ()=>{ init(); });
+</script>
