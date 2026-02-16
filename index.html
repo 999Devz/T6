@@ -201,6 +201,7 @@ section.active{display:block}
 </div>
 
 <main>
+
   <div id="homeHeader">
     <h1>TAHIRI</h1>
     <p>De Tahiri Site</p>
@@ -224,7 +225,6 @@ section.active{display:block}
     <div id="addMemberContainer" style="margin-bottom:16px;"></div>
     <div class="team-grid" id="teamGrid"></div>
   </section>
-
   <section id="contact">
     <h2>Contact</h2>
     <p>Mail: TahiriBusiness@gmail.com</p>
@@ -267,6 +267,7 @@ section.active{display:block}
       <select id="modalRole">
         <option value="visitor">Visitor</option>
         <option value="member">Member</option>
+        <option value="staff">Staff</option>
         <option value="leader">Leader</option>
         <option value="founder">Founder</option>
       </select>
@@ -278,7 +279,6 @@ section.active{display:block}
 
 </main>
 
-<!-- JavaScript volgt in Deel 2 -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
@@ -297,11 +297,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// DOM ELEMENTS
 const chatInput = document.getElementById("chatInput");
 const chatFeed = document.getElementById("chatFeed");
 const chatPermissionMsg = document.getElementById("chatPermissionMsg");
 const teamGrid = document.getElementById("teamGrid");
-
 const authBtn = document.getElementById("authBtn");
 const regMsg = document.getElementById("regMsg");
 const loginMsg = document.getElementById("loginMsg");
@@ -309,7 +309,6 @@ const loginMsg = document.getElementById("loginMsg");
 const regName = document.getElementById("regName");
 const regEmail = document.getElementById("regEmail");
 const regPass = document.getElementById("regPass");
-
 const loginIdentifier = document.getElementById("loginIdentifier");
 const loginPass = document.getElementById("loginPass");
 const loginBtn = document.getElementById("loginBtn");
@@ -319,27 +318,29 @@ const menuBtn = document.getElementById("menuBtn");
 const overlay = document.getElementById("overlay");
 const sideMenu = document.getElementById("sidemenu");
 
+// DATABASE REFERENCES
 const usersRef = ref(db,'users');
 const feedRef = ref(db,'chatFeed');
+const privateFeedRef = ref(db,'privateFeed'); // <-- voor private members chat
 
+// VARIABLES
 let users = [];
 let current = null;
 let feed = [];
 const DEFAULT_AVATAR="https://i.imgur.com/6VBx3io.png";
 
-// --- Menu functies ---
-function openMenu(){ sideMenu.style.left="0px"; overlay.style.display="block"; }
-function closeMenu(){ sideMenu.style.left="-260px"; overlay.style.display="none"; }
+// --- ROLES & PERMISSIONS ---
+const rolesPermissions = {
+  visitor: {chatSend:false, chatEditOwn:false, chatEditAll:false},
+  member: {chatSend:true, chatEditOwn:true, chatEditAll:false},
+  staff: {chatSend:true, chatEditOwn:true, chatEditAll:true}, // staff kan berichten van iedereen verwijderen/bewerken
+  leader: {chatSend:true, chatEditOwn:true, chatEditAll:true},
+  founder: {chatSend:true, chatEditOwn:true, chatEditAll:true}
+};
 
-// --- Pagina navigatie ---
-function openPage(id){
-  document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
-  const el=document.getElementById(id);
-  if(el) el.classList.add("active");
-  document.getElementById("homeHeader").classList.toggle("active", id==="home");
-  closeMenu();
-}
-
+// --- MENU FUNCTIONS ---
+function openMenu(){ sideMenu.style.left = "0px"; overlay.style.display = "block"; }
+function closeMenu(){ sideMenu.style.left = "-260px"; overlay.style.display = "none"; }
 function setupNavigation(){
   document.querySelectorAll("#sidemenu a[data-page]").forEach(link=>{
     link.addEventListener("click", ()=>{
@@ -348,23 +349,29 @@ function setupNavigation(){
     });
   });
 }
-
-// --- Auth functies ---
+function openPage(id){
+  document.querySelectorAll("main > section").forEach(s=>s.classList.remove("active"));
+  const el=document.getElementById(id);
+  if(el) el.classList.add("active");
+  document.getElementById("homeHeader").classList.toggle("active", id==="home");
+  closeMenu();
+}
+// --- AUTH FUNCTIONS ---
 function updateAuthButton(){ authBtn.innerText = current ? "Uitloggen" : "Inloggen"; }
 
 function updatePermissions(){
-  if(!current || !["member","leader","founder"].includes(current.role)){
-    chatInput.disabled=true;
-    chatPermissionMsg.innerText="Je moet ingelogd zijn als member of hoger om berichten te sturen.";
+  if(!current || !rolesPermissions[current.role].chatSend){
+    chatInput.disabled = true;
+    chatPermissionMsg.innerText = "Je moet ingelogd zijn als member of hoger om berichten te sturen.";
   } else {
-    chatInput.disabled=false;
-    chatPermissionMsg.innerText="";
+    chatInput.disabled = false;
+    chatPermissionMsg.innerText = "";
   }
 }
 
 function handleAuth(){
   if(current){
-    current=null;
+    current = null;
     localStorage.removeItem("currentUserEmail");
     updatePermissions();
     updateAuthButton();
@@ -377,25 +384,21 @@ function handleAuth(){
 
 function register(){
   regMsg.innerHTML="";
-  const name=regName.value.trim();
-  const email=regEmail.value.trim();
-  const pass=regPass.value.trim();
-  if(!name||!email||!pass){
-    regMsg.innerHTML="<div class='error-msg'>Vul alle velden in.</div>"; return;
+  const name = regName.value.trim();
+  const email = regEmail.value.trim();
+  const pass = regPass.value.trim();
+  if(!name || !email || !pass){
+    regMsg.innerHTML="<div class='error-msg'>Vul alle velden in.</div>";
+    return;
   }
-  if(users.find(u=>u.email===email)){
-    regMsg.innerHTML="<div class='error-msg'>Email bestaat al.</div>"; return;
+  if(users.find(u => u.email === email)){
+    regMsg.innerHTML="<div class='error-msg'>Email bestaat al.</div>";
+    return;
   }
   users.push({
-    id:crypto.randomUUID(),
-    name,
-    email,
-    mail: email,
-    pass,
-    role:"visitor",
-    avatar:"",
-    bio:"",
-    contact:""
+    id: crypto.randomUUID(),
+    name, email, mail: email, pass,
+    role: "visitor", avatar:"", bio:"", contact:""
   });
   saveUsers();
   regMsg.innerHTML="<div class='success-msg'>Account succesvol aangemaakt!</div>";
@@ -404,57 +407,178 @@ function register(){
 
 function login(){
   loginMsg.innerHTML="";
-  const id=loginIdentifier.value.trim();
-  const pass=loginPass.value.trim();
-  if(!id||!pass){ loginMsg.innerText="Vul alle velden in."; return; }
-  const user=users.find(u=>u.email===id||u.name===id);
+  const id = loginIdentifier.value.trim();
+  const pass = loginPass.value.trim();
+  if(!id || !pass){ loginMsg.innerText="Vul alle velden in."; return; }
+
+  const user = users.find(u => u.email===id || u.name===id);
   if(!user){ loginMsg.innerText="Account niet gevonden."; return; }
   if(user.pass!==pass){ loginMsg.innerText="Wachtwoord klopt niet."; return; }
-  current=user;
+
+  current = user;
   localStorage.setItem("currentUserEmail", current.email);
   updatePermissions();
   updateAuthButton();
   loadTeam();
   openPage("home");
-  loginMsg.innerText="";
 }
 
-// --- Chat functies ---
-function renderChat(){
-  chatFeed.innerHTML="";
-  feed.sort((a,b)=>a.timestamp-b.timestamp).forEach(m=>{
-    chatFeed.innerHTML += `<div class="msg"><b>${m.name}</b>: ${m.text}</div>`;
-  });
-}
-
+// --- CHAT FUNCTIONS ---
 chatInput.addEventListener("keypress", e=>{
   if(e.key==="Enter"){
-    if(chatInput.disabled||!current) return;
+    if(chatInput.disabled || !current) return;
     if(chatInput.value.trim()==="") return;
-    const msg={name:current.name,text:chatInput.value,timestamp:Date.now()};
-    set(ref(db,'chatFeed/'+msg.timestamp), msg);
+    const msg={id:crypto.randomUUID(), name:current.name, email:current.email, text:chatInput.value, timestamp:Date.now()};
+    set(ref(db,'chatFeed/'+msg.id), msg);
     chatInput.value="";
   }
 });
 
-// --- Users opslaan & laden ---
-function saveUsers(){
-  const obj={};
-  users.forEach(u=>obj[u.id]=u);
-  set(usersRef,obj);
+// --- RENDER CHAT WITH EDIT/DELETE ---
+function renderChat(){
+  chatFeed.innerHTML="";
+  feed.sort((a,b)=>a.timestamp-b.timestamp).forEach(m=>{
+    let canEdit = current && (m.email===current.email && rolesPermissions[current.role].chatEditOwn) || rolesPermissions[current.role].chatEditAll;
+    chatFeed.innerHTML += `<div class="msg" id="msg-${m.id}">
+      <b>${m.name}</b>: <span class="msg-text">${m.text}</span>
+      ${canEdit?`<button onclick='editMsg("${m.id}")'>✏️</button> <button onclick='deleteMsg("${m.id}")'>🗑️</button>`:""}
+    </div>`;
+  });
 }
 
-// --- Team renderen ---
-let editingId=null;
+// --- MESSAGE EDIT / DELETE ---
+window.editMsg = function(id){
+  const m = feed.find(x=>x.id===id);
+  if(!m) return;
+  if(!current || (!(m.email===current.email && rolesPermissions[current.role].chatEditOwn) && !rolesPermissions[current.role].chatEditAll)) return;
+  const newText = prompt("Bewerk bericht:", m.text);
+  if(newText!==null){
+    m.text = newText;
+    set(ref(db,'chatFeed/'+id), m);
+  }
+}
+
+window.deleteMsg = function(id){
+  const m = feed.find(x=>x.id===id);
+  if(!m) return;
+  if(!current || (!(m.email===current.email && rolesPermissions[current.role].chatEditOwn) && !rolesPermissions[current.role].chatEditAll)) return;
+  set(ref(db,'chatFeed/'+id), null);
+}
+
+// --- PRIVATE MEMBERS-ONLY CHAT ---
+const privateChatInput = document.createElement("input");
+privateChatInput.placeholder = "Private members chat...";
+privateChatInput.style.width = "100%";
+privateChatInput.style.marginTop = "10px";
+
+const privateChatFeed = document.createElement("div");
+privateChatFeed.style.maxHeight="200px";
+privateChatFeed.style.overflow="auto";
+privateChatFeed.style.marginTop="5px";
+
+document.getElementById("projects").appendChild(privateChatFeed);
+document.getElementById("projects").appendChild(privateChatInput);
+
+privateChatInput.addEventListener("keypress", e=>{
+  if(e.key==="Enter"){
+    if(!current || !["member","staff","leader","founder"].includes(current.role)) return;
+    if(privateChatInput.value.trim()==="") return;
+    const msg={id:crypto.randomUUID(), name:current.name, email:current.email, text:privateChatInput.value, timestamp:Date.now()};
+    set(ref(db,'privateFeed/'+msg.id), msg);
+    privateChatInput.value="";
+  }
+});
+
+function renderPrivateChat(msgs){
+  privateChatFeed.innerHTML="";
+  msgs.sort((a,b)=>a.timestamp-b.timestamp).forEach(m=>{
+    let canEdit = current && (m.email===current.email && rolesPermissions[current.role].chatEditOwn) || rolesPermissions[current.role].chatEditAll;
+    privateChatFeed.innerHTML += `<div class="msg" id="pmsg-${m.id}">
+      <b>${m.name}</b>: <span class="msg-text">${m.text}</span>
+      ${canEdit?`<button onclick='editPrivateMsg("${m.id}")'>✏️</button> <button onclick='deletePrivateMsg("${m.id}")'>🗑️</button>`:""}
+    </div>`;
+  });
+}
+
+window.editPrivateMsg = function(id){
+  const m = privateFeed.find(x=>x.id===id);
+  if(!m) return;
+  if(!current || (!(m.email===current.email && rolesPermissions[current.role].chatEditOwn) && !rolesPermissions[current.role].chatEditAll)) return;
+  const newText = prompt("Bewerk bericht:", m.text);
+  if(newText!==null){
+    m.text = newText;
+    set(ref(db,'privateFeed/'+id), m);
+  }
+}
+
+window.deletePrivateMsg = function(id){
+  const m = privateFeed.find(x=>x.id===id);
+  if(!m) return;
+  if(!current || (!(m.email===current.email && rolesPermissions[current.role].chatEditOwn) && !rolesPermissions[current.role].chatEditAll)) return;
+  set(ref(db,'privateFeed/'+id), null);
+}
+// --- TEAM / PROFIELSYSTEEM ---
+let editingId = null;
+
+window.openEdit = function(id){
+  editingId = id;
+  const u = users.find(x => x.id === id);
+  if(!u) return;
+  document.getElementById("modalName").value = u.name;
+  document.getElementById("modalEmail").value = u.email;
+  document.getElementById("modalBio").value = u.bio;
+  document.getElementById("modalRole").value = u.role;
+  document.getElementById("editModal").style.display = "flex";
+}
+
+window.closeModal = function(){
+  editingId = null;
+  document.getElementById("editModal").style.display = "none";
+}
+
+document.getElementById("modalAvatar").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const u = users.find(x=>x.id===editingId);
+    if(!u) return;
+    u.avatar = ev.target.result;
+    saveUsers(); loadTeam();
+  };
+  reader.readAsDataURL(file);
+});
+
+window.saveEdit = function(){
+  const u = users.find(x=>x.id===editingId);
+  if(!u) return;
+
+  u.name = document.getElementById("modalName").value;
+  u.email = document.getElementById("modalEmail").value;
+  u.mail = u.email;
+  u.bio = document.getElementById("modalBio").value;
+
+  // Alleen founder/leader kan role aanpassen
+  if(current && ["leader","founder"].includes(current.role)){
+    u.role = document.getElementById("modalRole").value;
+  }
+
+  saveUsers(); loadTeam(); closeModal();
+}
+
+// --- RENDER TEAM GRID ---
 function loadTeam(){
-  teamGrid.innerHTML="";
+  teamGrid.innerHTML = "";
   users.forEach(u=>{
-    let canEdit=false;
-    if(current && (["leader","founder"].includes(current.role)||current.email===u.email)) canEdit=true;
+    let canEdit = false;
+    if(current){
+      if(["leader","founder"].includes(current.role) || current.email===u.email) canEdit=true;
+    }
+
     teamGrid.innerHTML += `
       <div class="member">
         <div class="member-top">
-          <div class="avatar" style="background-image:url('${u.avatar||DEFAULT_AVATAR}')"></div>
+          <div class="avatar" style="background-image:url('${u.avatar || DEFAULT_AVATAR}')"></div>
           <div class="member-info">
             <h4>${u.name}</h4>
             <div class="role">${u.role}</div>
@@ -465,110 +589,68 @@ function loadTeam(){
         ${canEdit?`<button class="edit-btn" onclick='openEdit("${u.id}")'>Edit</button>`:""}
       </div>`;
   });
+
   renderAddMemberButton();
 }
 
-// --- Edit modal ---
-window.openEdit=function(id){
-  editingId=id;
-  const u=users.find(x=>x.id===id);
-  if(!u) return;
-  document.getElementById("modalName").value=u.name;
-  document.getElementById("modalEmail").value=u.email;
-  document.getElementById("modalBio").value=u.bio;
-  document.getElementById("modalRole").value=u.role;
-  document.getElementById("editModal").style.display="flex";
-}
-
-window.closeModal=function(){ editingId=null; document.getElementById("editModal").style.display="none"; }
-
-document.getElementById("modalAvatar").addEventListener("change", e=>{
-  const file=e.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=function(ev){
-    let u=users.find(x=>x.id===editingId);
-    if(!u) return;
-    u.avatar=ev.target.result;
-    saveUsers(); loadTeam();
-  };
-  reader.readAsDataURL(file);
-});
-
-window.saveEdit=function(){
-  const u=users.find(x=>x.id===editingId); if(!u) return;
-  u.name=document.getElementById("modalName").value;
-  u.email=document.getElementById("modalEmail").value;
-  u.mail=u.email;
-  u.bio=document.getElementById("modalBio").value;
-  u.role=document.getElementById("modalRole").value;
-  saveUsers(); loadTeam(); closeModal();
-}
-
-// --- Nieuw profiel knop ---
+// --- ADD MEMBER BUTTON ---
 function renderAddMemberButton(){
-  const container=document.getElementById("addMemberContainer");
-  container.innerHTML="";
+  const container = document.getElementById("addMemberContainer");
+  container.innerHTML = "";
   if(current && ["leader","founder"].includes(current.role)){
-    const btn=document.createElement("button");
-    btn.innerText="Nieuw Profiel";
-    btn.style.background="var(--accent)";
-    btn.style.color="white";
-    btn.style.border="none";
-    btn.style.padding="8px 12px";
-    btn.style.cursor="pointer";
+    const btn = document.createElement("button");
+    btn.innerText = "Nieuw Profiel";
+    btn.style.background = "var(--accent)";
+    btn.style.color = "white";
+    btn.style.border = "none";
+    btn.style.padding = "8px 12px";
+    btn.style.cursor = "pointer";
     btn.addEventListener("click", ()=>{
-      const newUser={
-        id:crypto.randomUUID(),
-        name:"Nieuw Lid",
-        email:"",
-        mail:"",
-        pass:"",
-        role:"visitor",
-        avatar:"",
-        bio:"",
-        contact:""
-      };
+      const newUser = { id:crypto.randomUUID(), name:"Nieuw Lid", email:"", mail:"", pass:"", role:"visitor", avatar:"", bio:"", contact:"" };
       users.push(newUser);
-      saveUsers();
-      loadTeam();
-      openEdit(newUser.id);
+      saveUsers(); loadTeam(); openEdit(newUser.id);
     });
     container.appendChild(btn);
   }
 }
 
-// --- Init ---
+// --- INIT & LISTENERS ---
 async function init(){
   setupNavigation();
-  const snapUsers = await get(usersRef);
-  if(snapUsers.exists()) users=Object.values(snapUsers.val());
 
-  // login persistentie
+  const snapUsers = await get(usersRef);
+  if(snapUsers.exists()) users = Object.values(snapUsers.val());
+
+  // --- Login persist ---
   const storedEmail = localStorage.getItem("currentUserEmail");
-  if(storedEmail) current=users.find(u=>u.email===storedEmail)||null;
+  if(storedEmail) current = users.find(u=>u.email===storedEmail) || null;
 
   loadTeam();
 
   const snapFeed = await get(feedRef);
-  if(snapFeed.exists()) feed=Object.values(snapFeed.val());
+  if(snapFeed.exists()) feed = Object.values(snapFeed.val());
   renderChat();
 
-  onValue(feedRef, snap=>{ if(snap.exists()){ feed=Object.values(snap.val()); renderChat(); }});
-  onValue(usersRef, snap=>{ if(snap.exists()){ users=Object.values(snap.val()); loadTeam(); }});
+  // Private feed
+  const snapPrivate = await get(ref(db,'privateFeed'));
+  if(snapPrivate.exists()) privateFeed = Object.values(snapPrivate.val());
+  renderPrivateChat(privateFeed);
+
+  // Real-time listeners
+  onValue(feedRef, snap=>{ if(snap.exists()){ feed = Object.values(snap.val()); renderChat(); }});
+  onValue(ref(db,'privateFeed'), snap=>{ if(snap.exists()){ privateFeed = Object.values(snap.val()); renderPrivateChat(privateFeed); }});
+  onValue(usersRef, snap=>{ if(snap.exists()){ users = Object.values(snap.val()); loadTeam(); }});
 
   updatePermissions();
   updateAuthButton();
   openPage("home");
 }
 
-// --- Event listeners ---
+// --- EVENT LISTENERS ---
 menuBtn.addEventListener("click", openMenu);
 overlay.addEventListener("click", closeMenu);
 authBtn.addEventListener("click", handleAuth);
 loginBtn.addEventListener("click", login);
 regBtn.addEventListener("click", register);
 
-document.addEventListener("DOMContentLoaded", init);
-</script>
-</body>
-</html>
+document.addEventListener("DOMContentLoaded", ()=>{ init(); });
